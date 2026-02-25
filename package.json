@@ -7,10 +7,26 @@
   "scripts": {
     "dev:client": "cd client && bun run tauri dev",
     "dev:server": "cd server && bun run dev",
-    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\""
+    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\"",
+    "db:generate": "cd server && bunx drizzle-kit generate",
+    "db:migrate": "cd server && bunx drizzle-kit push",
+    "db:studio": "cd server && bunx drizzle-kit studio",
+    "build:client": "cd client && bun run build",
+    "build:server": "cd server && bun build ./src/index.ts --compile --outfile server-build",
+    "build:tauri": "cd client && bun run tauri build",
+    "build": "bun run build:client && bun run build:server && bun run build:tauri",
+    "typecheck:client": "cd client && bunx tsc --noEmit",
+    "typecheck:server": "cd server && bunx tsc --noEmit",
+    "typecheck": "concurrently \"bun run typecheck:client\" \"bun run typecheck:server\"",
+    "clean": "bunx rimraf node_modules client/node_modules server/node_modules client/dist client/src-tauri/target server/server-build",
+    "reinstall": "bun run clean && bun install",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write ."
   },
   "private": true,
   "devDependencies": {
+    "@biomejs/biome": "2.4.4",
     "@types/bun": "latest",
     "concurrently": "^9.2.1"
   },
