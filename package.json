@@ -1,0 +1,20 @@
+{
+  "name": "poe2-party-finder",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "cd client && bun run tauri dev",
+    "dev:server": "cd server && bun run dev",
+    "dev": "concurrently \"bun run dev:client\" \"bun run dev:server\""
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "concurrently": "^9.2.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
