@@ -16,7 +16,7 @@ This repository uses **Bun Workspaces** to manage both the server and client pac
 ### Client-side Stack
 - **Desktop Wrapper:** [Tauri v2](https://v2.tauri.app/) (Compiles the web app into a lightweight native desktop application)
 - **Package Bundler:** [Vite](https://vitejs.dev/)
-- **UI & Styling:** React 19 + Tailwind CSS v4
+- **UI & Styling:** React 19 + Tailwind CSS v4 + ShadCN UI
 - **Routing:** [TanStack Router](https://tanstack.com/router/latest) (Fully type-safe routing)
 - **Data Fetching:** [TanStack Query](https://tanstack.com/query/latest) (React Query)
 - **API Client:** [Eden (Elysia Client)](https://elysiajs.com/eden/overview.html) (`@elysiajs/eden`). Imports the backend `App` type to provide absolute type safety and autocomplete when calling backend routes.
@@ -31,7 +31,8 @@ Currently, the project contains a foundational **"Post Board" / Bulletin Board**
    - Exposes a `GET /posts` endpoint to fetch all active posts in descending order.
    - Exposes a `POST /posts` endpoint to create a new post entry in the PostgreSQL database.
 3. **Frontend Implementation (`client/src/routes/index.tsx`):**
-   - The desktop wrapper launches a React UI that uses TanStack Query to fetch and display the posts list.
+   - The desktop wrapper launches a React UI (wrapped in a Shadcn `ThemeProvider` for default dark mode) that uses TanStack Query to fetch and display the posts list.
+   - The interface is constructed using standard Shadcn UI components (`Card`, `Button`, `Input`, etc.).
    - A form uses Eden's type-safe `api.posts.post` mutation to send data to the backend. Upon success, the UI instantly refetches and updates the board.
 
 This fully functional demo serves as a reference architecture for building out the actual PoE 2 party-finding features using this type-safe stack.
