@@ -30,7 +30,7 @@ Currently, the project contains a foundational **"Post Board" / Bulletin Board**
 2. **Backend Engine (`server/src/index.ts`):** 
    - Exposes a `GET /posts` endpoint to fetch all active posts in descending order.
    - Exposes a `POST /posts` endpoint to create a new post entry in the PostgreSQL database.
-3. **Frontend Implementation (`client/src/routes/index.tsx`):**
+3. **Frontend Implementation (`client/src/routes/posts-example.tsx`):**
    - The desktop wrapper launches a React UI (wrapped in a Shadcn `ThemeProvider` for default dark mode) that uses TanStack Query to fetch and display the posts list.
    - The interface is constructed using standard Shadcn UI components (`Card`, `Button`, `Input`, etc.).
    - A form uses Eden's type-safe `api.posts.post` mutation to send data to the backend. Upon success, the UI instantly refetches and updates the board.
