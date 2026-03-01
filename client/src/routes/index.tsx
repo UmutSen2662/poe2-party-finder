@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/collapsible";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioPillGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -22,7 +24,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -34,14 +35,14 @@ function Index() {
   const [hostRating, setHostRating] = useState([2.5]);
   const [includeUnrated, setIncludeUnrated] = useState(true);
   const [liveSearchEnabled, setLiveSearchEnabled] = useState(false);
-  const [category, setCategory] = useState(["all"]);
+  const [category, setCategory] = useState("all");
   const [league, setLeague] = useState("Fate of the Vaal");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [currency, setCurrency] = useState("Divine Orb");
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-background text-foreground p-6 gap-6 max-w-7xl mx-auto">
+    <div className="flex flex-col w-full min-h-screen bg-background text-foreground p-6 gap-6 max-w-4xl mx-auto">
       {/* Header Section */}
       <div className="flex items-center justify-between w-full pb-2 border-b border-border/40">
         <div className="flex items-center gap-3">
@@ -75,13 +76,14 @@ function Index() {
                 className="pl-9 pr-9 bg-card"
               />
               {searchQuery && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
               )}
             </div>
 
@@ -106,25 +108,18 @@ function Index() {
           {/* Action Row */}
           <div className="flex items-center justify-between gap-3 w-full">
             {/* Left Side: Live Search Switch */}
-            <div className="flex-1 flex justify-start items-center space-x-2">
+            <div className="flex-1 flex justify-start items-center gap-2 pl-1">
               <Switch
                 id="live-search"
                 checked={liveSearchEnabled}
                 onCheckedChange={setLiveSearchEnabled}
               />
-              <label
-                htmlFor="live-search"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-primary"
-              >
-                Live Search
-              </label>
+              <Label htmlFor="live-search">Live Search</Label>
             </div>
 
             {/* Center: Search Button */}
             <div className="flex flex-1 justify-center">
-              <Button className="px-12 max-w-sm bg-primary/90 hover:bg-primary text-primary-foreground">
-                Search
-              </Button>
+              <Button className="px-12 max-w-sm">Search</Button>
             </div>
 
             {/* Right Side: Filter Button */}
@@ -150,200 +145,178 @@ function Index() {
 
         {/* Expandable Filter Section */}
         <CollapsibleContent>
-          <div className="pt-2">
-            <Card className="border-border/50 bg-card/50">
-              <CardContent className="flex flex-col gap-8">
-                {/* Filter Row 1: Category */}
-                <div className="flex flex-col gap-4">
+          <Card className="mt-2 border-border/50 bg-card/50">
+            <CardContent className="flex flex-col gap-8">
+              {/* Filter Row 1: Category */}
+              <div className="flex flex-col gap-4">
+                <div className="text-muted-foreground font-medium text-xs tracking-wider">
+                  Service Category
+                </div>
+                <RadioGroup
+                  value={category}
+                  onValueChange={setCategory}
+                  className="flex flex-wrap justify-start gap-2"
+                >
+                  <RadioPillGroupItem value="all">All</RadioPillGroupItem>
+                  <RadioPillGroupItem value="boss">
+                    Boss Carries
+                  </RadioPillGroupItem>
+                  <RadioPillGroupItem value="campaign">
+                    Campaign Progression
+                  </RadioPillGroupItem>
+                  <RadioPillGroupItem value="lab">
+                    Labyrinth Runs
+                  </RadioPillGroupItem>
+                  <RadioPillGroupItem value="crafting">
+                    Crafting Services
+                  </RadioPillGroupItem>
+                </RadioGroup>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
+                {/* Filter Row 2: Provider Requirements */}
+                <div className="flex flex-col gap-6">
                   <div className="text-muted-foreground font-medium text-xs tracking-wider">
-                    Service Category
-                  </div>
-                  <ToggleGroup
-                    value={category}
-                    onValueChange={setCategory}
-                    className="flex flex-wrap justify-start gap-2"
-                  >
-                    <ToggleGroupItem
-                      value="all"
-                      className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground rounded-full px-6"
-                    >
-                      All
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="boss"
-                      className="rounded-full px-6 border border-border/50"
-                    >
-                      Boss Carries
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="campaign"
-                      className="rounded-full px-6 border border-border/50"
-                    >
-                      Campaign Progression
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="lab"
-                      className="rounded-full px-6 border border-border/50"
-                    >
-                      Labyrinth Runs
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="crafting"
-                      className="rounded-full px-6 border border-border/50"
-                    >
-                      Crafting Services
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-
-                <Separator />
-
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-12">
-                  {/* Filter Row 2: Provider Requirements */}
-                  <div className="flex flex-col gap-6">
-                    <div className="text-muted-foreground font-medium text-xs tracking-wider">
-                      Provider Requirements
-                    </div>
-
-                    <Field>
-                      <div className="flex items-center justify-between mb-2">
-                        <FieldLabel htmlFor="host-rating">
-                          Minimum Host Rating
-                        </FieldLabel>
-                        <span className="text-primary font-bold text-base">
-                          {hostRating[0]}
-                        </span>
-                      </div>
-                      <Slider
-                        id="host-rating"
-                        defaultValue={[2.5]}
-                        max={5}
-                        step={0.5}
-                        value={hostRating}
-                        onValueChange={(val) =>
-                          setHostRating(Array.isArray(val) ? [...val] : [val])
-                        }
-                        className="py-2"
-                      />
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                        <span>0 (New)</span>
-                        <span>5 (Trusted)</span>
-                      </div>
-                    </Field>
-
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Checkbox
-                        id="include-unrated"
-                        checked={includeUnrated}
-                        onCheckedChange={(checked) =>
-                          setIncludeUnrated(checked as boolean)
-                        }
-                      />
-                      <label
-                        htmlFor="include-unrated"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Include Unrated/New Hosts
-                      </label>
-                    </div>
+                    Provider Requirements
                   </div>
 
-                  <Separator orientation="vertical" />
-
-                  {/* Filter Row 2: Pricing */}
-                  <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground font-medium text-xs tracking-wider">
-                        Pricing
-                      </div>
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => {
-                          setMinPrice("");
-                          setMaxPrice("");
-                        }}
-                        className="text-xs cursor-pointer p-1 h-auto"
-                      >
-                        Clear
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <Field>
-                        <FieldLabel
-                          htmlFor="min-price"
-                          className="text-xs text-muted-foreground mb-1"
-                        >
-                          Min Price
-                        </FieldLabel>
-                        <Input
-                          id="min-price"
-                          type="number"
-                          placeholder="Min"
-                          value={minPrice}
-                          onChange={(e) => setMinPrice(e.target.value)}
-                          className="bg-background [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          autoComplete="off"
-                        />
-                      </Field>
-                      <Field>
-                        <FieldLabel
-                          htmlFor="max-price"
-                          className="text-xs text-muted-foreground mb-1"
-                        >
-                          Max Price
-                        </FieldLabel>
-                        <Input
-                          id="max-price"
-                          type="number"
-                          placeholder="Max"
-                          value={maxPrice}
-                          onChange={(e) => setMaxPrice(e.target.value)}
-                          className="bg-background [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          autoComplete="off"
-                        />
-                      </Field>
-                    </div>
-
-                    <Field>
-                      <FieldLabel className="text-xs text-muted-foreground mb-1">
-                        Currency
+                  <Field>
+                    <div className="flex items-center justify-between mb-2">
+                      <FieldLabel htmlFor="host-rating">
+                        Minimum Host Rating
                       </FieldLabel>
-                      <Select
-                        value={currency}
-                        onValueChange={(val) => setCurrency(val || "")}
-                      >
-                        <SelectTrigger className="w-full bg-background">
-                          <SelectValue placeholder="Select Currency" />
-                        </SelectTrigger>
-                        <SelectPositioner>
-                          <SelectContent>
-                            <SelectItem value="Divine Orb">
-                              <span className="flex items-center gap-2">
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
-                                  D
-                                </div>
-                                Divine Orb
-                              </span>
-                            </SelectItem>
-                            <SelectItem value="Chaos Orb">
-                              <span className="flex items-center gap-2">
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
-                                  C
-                                </div>
-                                Chaos Orb
-                              </span>
-                            </SelectItem>
-                          </SelectContent>
-                        </SelectPositioner>
-                      </Select>
-                    </Field>
+                      <span className="text-primary font-bold text-base">
+                        {hostRating[0]}
+                      </span>
+                    </div>
+                    <Slider
+                      id="host-rating"
+                      defaultValue={[2.5]}
+                      max={5}
+                      step={0.5}
+                      value={hostRating}
+                      onValueChange={(val) =>
+                        setHostRating(Array.isArray(val) ? [...val] : [val])
+                      }
+                      className="py-2"
+                    />
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                      <span>0 (New)</span>
+                      <span>5 (Trusted)</span>
+                    </div>
+                  </Field>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="include-unrated"
+                      checked={includeUnrated}
+                      onCheckedChange={(checked) =>
+                        setIncludeUnrated(checked as boolean)
+                      }
+                    />
+                    <Label htmlFor="include-unrated">
+                      Include Unrated/New Hosts
+                    </Label>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+
+                <Separator orientation="vertical" />
+
+                {/* Filter Row 2: Pricing */}
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-muted-foreground font-medium text-xs tracking-wider">
+                      Pricing
+                    </div>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => {
+                        setMinPrice("");
+                        setMaxPrice("");
+                      }}
+                      className="text-xs cursor-pointer p-1 h-auto"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel
+                        htmlFor="min-price"
+                        className="text-xs text-muted-foreground mb-1"
+                      >
+                        Min Price
+                      </FieldLabel>
+                      <Input
+                        id="min-price"
+                        type="number"
+                        placeholder="Min"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        className="bg-background no-spinner"
+                        autoComplete="off"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel
+                        htmlFor="max-price"
+                        className="text-xs text-muted-foreground mb-1"
+                      >
+                        Max Price
+                      </FieldLabel>
+                      <Input
+                        id="max-price"
+                        type="number"
+                        placeholder="Max"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        className="bg-background no-spinner"
+                        autoComplete="off"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field>
+                    <FieldLabel className="text-xs text-muted-foreground mb-1">
+                      Currency
+                    </FieldLabel>
+                    <Select
+                      value={currency}
+                      onValueChange={(val) => setCurrency(val || "")}
+                    >
+                      <SelectTrigger className="w-full bg-background">
+                        <SelectValue placeholder="Select Currency" />
+                      </SelectTrigger>
+                      <SelectPositioner>
+                        <SelectContent>
+                          <SelectItem value="Divine Orb">
+                            <span className="flex items-center gap-2">
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                                D
+                              </div>
+                              Divine Orb
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="Chaos Orb">
+                            <span className="flex items-center gap-2">
+                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                                C
+                              </div>
+                              Chaos Orb
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </SelectPositioner>
+                    </Select>
+                  </Field>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CollapsibleContent>
       </Collapsible>
     </div>
