@@ -3,14 +3,14 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { posts } from "../../db/schema";
 
-export const postListRoutes = new Elysia()
-  .get("/posts", async () => {
+export const postListRoutes = new Elysia({ prefix: "/posts" })
+  .get("/", async () => {
     return await db.query.posts.findMany({
       orderBy: [desc(posts.createdAt)],
     });
   })
   .post(
-    "/posts",
+    "/",
     async ({ body }) => {
       const [newPost] = await db
         .insert(posts)
