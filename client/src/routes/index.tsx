@@ -32,14 +32,14 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
-  const [hostRating, setHostRating] = useState([2.5]);
+  const [hostRating, setHostRating] = useState([4.5]);
   const [includeUnrated, setIncludeUnrated] = useState(true);
   const [liveSearchEnabled, setLiveSearchEnabled] = useState(false);
   const [category, setCategory] = useState("all");
   const [league, setLeague] = useState("Fate of the Vaal");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [currency, setCurrency] = useState("Divine Orb");
+  const [currency, setCurrency] = useState("divine");
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background text-foreground p-6 gap-6 max-w-4xl mx-auto">
@@ -119,7 +119,7 @@ function Index() {
 
             {/* Center: Search Button */}
             <div className="flex flex-1 justify-center">
-              <Button className="px-12 max-w-sm">Search</Button>
+              <Button className="px-8 max-w-sm">Search</Button>
             </div>
 
             {/* Right Side: Filter Button */}
@@ -130,7 +130,6 @@ function Index() {
                 }
               >
                 <div className="flex items-center gap-2">
-                  <Search className="w-4 h-4" />
                   {isFiltersOpen ? "Hide Filters" : "Show Filters"}
                 </div>
                 {isFiltersOpen ? (
@@ -237,7 +236,7 @@ function Index() {
                         setMinPrice("");
                         setMaxPrice("");
                       }}
-                      className="text-xs cursor-pointer p-1 h-auto"
+                      className="text-xs p-1 h-auto"
                     >
                       Clear
                     </Button>
@@ -289,21 +288,43 @@ function Index() {
                       onValueChange={(val) => setCurrency(val || "")}
                     >
                       <SelectTrigger className="w-full bg-background">
-                        <SelectValue placeholder="Select Currency" />
+                        {currency ? (
+                          <span
+                            data-slot="select-value"
+                            className="flex items-center gap-2"
+                          >
+                            <div
+                              className={`flex shrink-0 items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold border ${
+                                currency === "divine"
+                                  ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                                  : "bg-zinc-500/20 text-zinc-600 dark:text-zinc-400 border-zinc-500/30"
+                              }`}
+                            >
+                              {currency === "divine" ? "D" : "C"}
+                            </div>
+                            <span className="truncate">
+                              {currency === "divine"
+                                ? "Divine Orb"
+                                : "Chaos Orb"}
+                            </span>
+                          </span>
+                        ) : (
+                          <SelectValue placeholder="Select Currency" />
+                        )}
                       </SelectTrigger>
                       <SelectPositioner>
                         <SelectContent>
-                          <SelectItem value="Divine Orb">
+                          <SelectItem value="divine">
                             <span className="flex items-center gap-2">
-                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                              <div className="flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/30">
                                 D
                               </div>
                               Divine Orb
                             </span>
                           </SelectItem>
-                          <SelectItem value="Chaos Orb">
+                          <SelectItem value="chaos">
                             <span className="flex items-center gap-2">
-                              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-[10px] font-bold">
+                              <div className="flex shrink-0 items-center justify-center w-4 h-4 rounded-full bg-zinc-500/20 text-zinc-600 dark:text-zinc-400 text-[10px] font-bold border border-zinc-500/30">
                                 C
                               </div>
                               Chaos Orb
