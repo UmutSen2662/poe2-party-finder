@@ -35,14 +35,21 @@ bunx drizzle-kit studio
 ## Detailed Directory Structure
 
 - `src/`
+  - `index.ts`: The server entry point (Swagger, CORS, etc.).
+    - **Crucially: `export type App = typeof app;`** (This type is imported by the frontend).
   - `db/`
     - `schema.ts`: Defines our database tables using Drizzle's `pgTable`.
     - `index.ts`: Creates the live Drizzle connection to the Postgres database.
   - `routes/`
-    - `app.ts`: The main Elysia server setup (Swagger, CORS, etc.).
-      - **Crucially: `export type App = typeof app;`** (This type is imported by the frontend).
-    - `*/`: Modular feature-based route definitions (e.g., `posts/posts.ts`).
+    - `api.ts`: Central route aggregator — imports and `.use()`s every feature plugin.
+    - `<feature>/`: Each domain (e.g., `posts/`) gets its own folder containing:
+      - `index.ts`: Elysia plugin entry point that groups all routes for this feature.
+      - `<feature>.handler.ts`: Route definitions and business logic.
 - `drizzle/`: Auto-generated SQL files created by `drizzle-kit generate`. Do not edit these directly.
+
+### Routing Architecture
+
+We follow the **Router-Controller (Pure Router Composition)** pattern. The entry point (`src/index.ts`) mounts `routes/api.ts`, which aggregates all feature plugins. Each feature lives in its own folder and is self-contained. To add a new feature, create a new folder under `routes/`, define your routes, and register it in `api.ts`.
 
 ---
 
