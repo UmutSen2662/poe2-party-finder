@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { HomeIcon, SlidersHorizontal } from "lucide-react";
+import { HomeIcon, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -34,7 +34,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link to="/" aria-label="Home" />}>
+                <SidebarMenuButton
+                  tooltip="Home"
+                  render={<Link to="/" aria-label="Home" />}
+                >
                   <HomeIcon />
                   <span>Home</span>
                 </SidebarMenuButton>
@@ -49,6 +52,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
+              tooltip="Settings"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               // @ts-expect-error The settings route hasn't been created yet but the user just wants to preview the UI
               render={<Link to="/settings" />}
@@ -62,7 +66,7 @@ export function AppSidebar() {
                 <span className="truncate text-xs">umut@example.com</span>
               </div>
               <div>
-                <SlidersHorizontal size={20} className="mr-1" />
+                <Settings size={20} className="mr-1" />
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
