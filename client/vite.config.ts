@@ -17,18 +17,7 @@ export default defineConfig({
   },
 
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom"],
-          "tanstack-vendor": [
-            "@tanstack/react-router",
-            "@tanstack/react-query",
-          ],
-          "ui-vendor": ["@base-ui/react", "lucide-react"],
-        },
-      },
-    },
+    chunkSizeWarningLimit: 1000,
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
