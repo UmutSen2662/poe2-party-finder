@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { HomeIcon, Settings } from "lucide-react";
+import { HomeIcon, Mail, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -32,7 +32,7 @@ export function AppSidebar() {
       <SidebarContent className="overflow-x-hidden [&::-webkit-scrollbar]:hidden">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Home"
@@ -40,6 +40,15 @@ export function AppSidebar() {
                 >
                   <HomeIcon />
                   <span>Home</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Posts"
+                  render={<Link to="/posts-example" aria-label="Posts" />}
+                >
+                  <Mail />
+                  <span>Posts</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
