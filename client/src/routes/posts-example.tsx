@@ -55,7 +55,7 @@ function PostsBoard() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full py-16">
+    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8">
       <Card>
         <CardHeader>
           <CardTitle>Create a new Post</CardTitle>
