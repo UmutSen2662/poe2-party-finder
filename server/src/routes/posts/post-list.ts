@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { posts } from "../../db/schema";
 
-export const postsRoutes = new Elysia()
+export const postListRoutes = new Elysia()
   .get("/posts", async () => {
     return await db.query.posts.findMany({
       orderBy: [desc(posts.createdAt)],

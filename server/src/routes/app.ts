@@ -1,7 +1,7 @@
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { postsRoutes } from "./posts/posts";
+import { postsRoutes } from "./posts/index";
 
 const app = new Elysia()
   .use(cors())
