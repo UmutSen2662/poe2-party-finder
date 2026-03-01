@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -11,7 +12,9 @@ export const Route = createRootRoute({
         <TooltipProvider>
           <SidebarProvider>
             <AppSidebar />
-            <Outlet />
+            <ScrollArea className="h-screen w-full">
+              <Outlet />
+            </ScrollArea>
           </SidebarProvider>
         </TooltipProvider>
       </div>
