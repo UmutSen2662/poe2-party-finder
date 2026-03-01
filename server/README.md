@@ -4,7 +4,17 @@ This workspace contains the backend API and database schemas for the Path of Exi
 
 ## Database & Migrations Workflow
 
-We use **Drizzle ORM** to manage our PostgreSQL database. Migrations and schema changes are executed strictly using Drizzle Kit.
+We use **Drizzle ORM** to manage our PostgreSQL database.
+
+### How the pieces fit together
+
+There are 3 key files:
+
+| File | Purpose |
+|---|---|
+| `drizzle.config.ts` | Tells the Drizzle CLI where your schema file is, where to output migrations, and how to connect to Postgres |
+| `src/db/schema.ts` | **The source of truth.** You define all your tables here using TypeScript. This is the only file you edit when changing the database structure |
+| `src/db/index.ts` | Creates the live database connection. Every handler imports `db` from here to run queries |
 
 ### 1. Configure the `.env` file
 Before the server can run or migrations can be applied, ensure you have a valid Postgres database running. Create a `.env` file inside the `server/` directory:
@@ -14,17 +24,52 @@ Before the server can run or migrations can be applied, ensure you have a valid 
 DATABASE_URL=postgres://demo_user:demo_password@localhost:5432/poe2_party_finder
 ```
 
-### 2. Drizzle Commands (Run from `server/` folder)
-If you change `src/db/schema.ts` to add new tables or columns, you must apply those changes:
+### 2. Defining tables in `schema.ts`
+Tables are defined using `pgTable`. Each column has a type (`varchar`, `text`, `integer`, `timestamp`, etc.) and optional constraints (`.notNull()`, `.primaryKey()`, `.defaultNow()`):
+
+```typescript
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 256 }).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+```
+
+When you want to add a new table, you simply add another `pgTable` call in this file.
+
+### 3. Applying changes to the database
+After editing `schema.ts`, you must push those changes to your actual Postgres database:
 
 ```bash
 cd server
-bunx drizzle-kit generate  # Generates the SQL migration files in the `drizzle/` directory
-bunx drizzle-kit push      # Pushes your fresh schema changes directly to the database
+bunx drizzle-kit generate  # Creates SQL migration files in the drizzle/ directory
+bunx drizzle-kit push      # Pushes schema changes directly to the database (best for dev)
 ```
-*(Note: These commands can also be run from the root directory using `bun run db:generate` and `bun run db:migrate`).*
+*(These commands can also be run from the root directory using `bun run db:generate` and `bun run db:migrate`).*
 
-If you want to view the data currently in the database via a web GUI:
+### 4. Querying the database in your code
+Import `db` from `src/db` and use the Drizzle query API:
+
+```typescript
+import { db } from "../../db";
+import { posts } from "../../db/schema";
+
+// Get all posts, newest first
+const allPosts = await db.query.posts.findMany({
+  orderBy: [desc(posts.createdAt)],
+});
+
+// Insert a new post
+const [newPost] = await db.insert(posts)
+  .values({ title: "My Post", content: "Hello world" })
+  .returning();
+```
+
+Everything here is fully typed — `newPost` will automatically have `id`, `title`, `content`, and `createdAt` properties with the correct types.
+
+### 5. Viewing your data
+To browse the database via a web GUI:
 ```bash
 cd server
 bunx drizzle-kit studio
