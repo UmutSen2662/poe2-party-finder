@@ -38,11 +38,10 @@ bunx drizzle-kit studio
   - `db/`
     - `schema.ts`: Defines our database tables using Drizzle's `pgTable`.
     - `index.ts`: Creates the live Drizzle connection to the Postgres database.
-  - `index.ts`: The main Elysia server setup. 
-    - Initializes Swagger UI
-    - Initializes CORS
-    - Sets up API route handlers.
-    - **Crucially: `export type App = typeof app;`** (This type is imported by the frontend).
+  - `routes/`
+    - `app.ts`: The main Elysia server setup (Swagger, CORS, etc.).
+      - **Crucially: `export type App = typeof app;`** (This type is imported by the frontend).
+    - `*/`: Modular feature-based route definitions (e.g., `posts/posts.ts`).
 - `drizzle/`: Auto-generated SQL files created by `drizzle-kit generate`. Do not edit these directly.
 
 ---
