@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import { postIdRoutes } from "./[id]";
-import { postListRoutes } from "./post-list";
+import { postListRoutes } from "./posts.handler";
 
-export const postsRoutes = new Elysia().use(postListRoutes).use(postIdRoutes);
+export const postsRoutes = new Elysia().use(postListRoutes);

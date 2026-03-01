@@ -1,7 +1,7 @@
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { postsRoutes } from "./posts/index";
+import { api } from "./routes/api";
 
 const app = new Elysia()
   .use(cors())
@@ -16,7 +16,7 @@ const app = new Elysia()
     }),
   )
   .get("/", () => "Hello Elysia")
-  .use(postsRoutes)
+  .use(api)
   .listen(3000);
 
 export type App = typeof app;
