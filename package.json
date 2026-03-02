@@ -2,7 +2,8 @@
   "name": "poe2-party-finder",
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "shared"
   ],
   "scripts": {
     "dev:client": "cd client && bun run tauri dev",
