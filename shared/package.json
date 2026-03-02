@@ -1,0 +1,6 @@
+{
+  "name": "@poe2-party-finder/shared",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module"
+}

@@ -20,6 +20,7 @@
         "@base-ui/react": "^1.2.0",
         "@elysiajs/eden": "^1.4.8",
         "@poe2-party-finder/server": "workspace:*",
+        "@poe2-party-finder/shared": "workspace:*",
         "@tanstack/react-query": "^5.90.21",
         "@tanstack/react-router": "^1.163.2",
         "@tauri-apps/api": "^2",
@@ -54,6 +55,7 @@
       "dependencies": {
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/swagger": "^1.3.1",
+        "@poe2-party-finder/shared": "workspace:*",
         "drizzle-orm": "^0.45.1",
         "elysia": "latest",
         "postgres": "^3.4.8",
@@ -62,6 +64,10 @@
         "bun-types": "latest",
         "drizzle-kit": "^0.31.9",
       },
+    },
+    "shared": {
+      "name": "@poe2-party-finder/shared",
+      "version": "1.0.0",
     },
   },
   "packages": {
@@ -276,6 +282,8 @@
     "@poe2-party-finder/client": ["@poe2-party-finder/client@workspace:client"],
 
     "@poe2-party-finder/server": ["@poe2-party-finder/server@workspace:server"],
+
+    "@poe2-party-finder/shared": ["@poe2-party-finder/shared@workspace:shared"],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.27", "", {}, "sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA=="],
 
