@@ -1,0 +1,52 @@
+import { desc, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { categories } from "../../db/schema";
+
+export const getAllCategories = async () => {
+  return await db.query.categories.findMany({
+    orderBy: [desc(categories.id)],
+  });
+};
+
+export const createCategory = async (data: {
+  displayName: string;
+  imagePath: string;
+}) => {
+  const [newCategory] = await db
+    .insert(categories)
+    .values({
+      displayName: data.displayName,
+      imagePath: data.imagePath,
+    })
+    .returning();
+  return newCategory;
+};
+
+export const updateCategory = async (
+  id: number,
+  data: { displayName: string; imagePath: string },
+) => {
+  const [updatedCategory] = await db
+    .update(categories)
+    .set({
+      displayName: data.displayName,
+      imagePath: data.imagePath,
+    })
+    .where(eq(categories.id, id))
+    .returning();
+  return updatedCategory;
+};
+
+export const deleteCategory = async (id: number) => {
+  const [deletedCategory] = await db
+    .delete(categories)
+    .where(eq(categories.id, id))
+    .returning();
+  return deletedCategory;
+};
+
+export const getCategoryById = async (id: number) => {
+  return await db.query.categories.findFirst({
+    where: eq(categories.id, id),
+  });
+};

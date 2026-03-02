@@ -6,3 +6,9 @@ export const posts = pgTable("posts", {
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  displayName: varchar("display_name", { length: 256 }).notNull(),
+  imagePath: varchar("image_path", { length: 512 }).notNull(),
+});
