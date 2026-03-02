@@ -22,6 +22,7 @@ Before the server can run or migrations can be applied, ensure you have a valid 
 ```env
 # server/.env
 DATABASE_URL=postgres://demo_user:demo_password@localhost:5432/poe2_party_finder
+UPLOAD_DIR=./uploads
 ```
 
 ### 2. Defining tables in `schema.ts`
@@ -87,9 +88,14 @@ bunx drizzle-kit studio
     - `index.ts`: Creates the live Drizzle connection to the Postgres database.
   - `routes/`
     - `api.ts`: Central route aggregator — imports and `.use()`s every feature plugin.
-    - `<feature>/`: Each domain (e.g., `posts/`) gets its own folder containing:
-      - `index.ts`: Elysia plugin entry point that groups all routes for this feature.
-      - `<feature>.handler.ts`: Route definitions and business logic.
+    - `posts/`: Post-related endpoints.
+      - `index.ts`: Elysia plugin with route definitions.
+      - `posts.service.ts`: Database queries and business logic.
+    - `categories/`: Category-related endpoints (CRUD for admin-managed categories).
+      - `index.ts`: Elysia plugin with route definitions.
+      - `categories.service.ts`: Database queries and business logic.
+- `uploads/`: Local image storage (gitignored). On VPS, configured via `UPLOAD_DIR` env var.
+  - `images/`: Admin-uploaded category images, etc.
 - `drizzle/`: Auto-generated SQL files created by `drizzle-kit generate`. Do not edit these directly.
 
 ### Routing Architecture
