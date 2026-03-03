@@ -76,6 +76,27 @@ cd server
 bunx drizzle-kit studio
 ```
 
+### 6. Seeding the database (dev data)
+
+To keep local databases consistent across all devs, we have a seed script that **clears everything and inserts fixed mock data**:
+
+```bash
+bun run db:seed
+```
+
+This runs `server/src/db/seed.ts`, which:
+1. **Truncates** all tables and resets auto-increment IDs back to 1
+2. **Inserts** the mock data defined in `server/src/db/seed-data.ts`
+
+#### Editing seed data
+
+To add or change test data, edit `src/db/seed-data.ts` and run `bun run db:seed` again. The data is deterministic — no randomness — so both machines always get identical rows with identical IDs.
+
+> **Note:** If you add a new table to `schema.ts`, remember to:
+> 1. Add its seed data to `seed-data.ts`
+> 2. Add the table name to the `TRUNCATE` statement in `seed.ts`
+> 3. Add an `insert` call in `seed.ts`
+
 ---
 
 ## Detailed Directory Structure
@@ -86,6 +107,8 @@ bunx drizzle-kit studio
   - `db/`
     - `schema.ts`: Defines our database tables using Drizzle's `pgTable`.
     - `index.ts`: Creates the live Drizzle connection to the Postgres database.
+    - `seed.ts`: Executable seed script — truncates tables and inserts mock data.
+    - `seed-data.ts`: Mock data arrays for seeding. Edit this to change dev test data.
   - `routes/`
     - `api.ts`: Central route aggregator — imports and `.use()`s every feature plugin.
     - `posts/`: Post-related endpoints.

@@ -10,7 +10,7 @@ export const getAllCategories = async () => {
 
 export const createCategory = async (data: {
   displayName: string;
-  imagePath: string;
+  imagePath?: string;
 }) => {
   const [newCategory] = await db
     .insert(categories)
@@ -24,14 +24,15 @@ export const createCategory = async (data: {
 
 export const updateCategory = async (
   id: number,
-  data: { displayName: string; imagePath: string },
+  data: {
+    displayName?: string;
+    imagePath?: string;
+    status?: "active" | "deleted";
+  },
 ) => {
   const [updatedCategory] = await db
     .update(categories)
-    .set({
-      displayName: data.displayName,
-      imagePath: data.imagePath,
-    })
+    .set(data)
     .where(eq(categories.id, id))
     .returning();
   return updatedCategory;
