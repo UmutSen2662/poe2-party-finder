@@ -42,7 +42,8 @@
         "client/src-tauri/**",
         "client/dist/**",
         "node_modules/**",
-        "**/.git/**"
+        "**/.git/**",
+        "server/drizzle/**"
       ],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }

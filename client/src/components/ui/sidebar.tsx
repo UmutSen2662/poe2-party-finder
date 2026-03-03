@@ -2,18 +2,18 @@
 /** biome-ignore-all lint/a11y/useValidAnchor: standart */
 /** biome-ignore-all lint/a11y/useAnchorContent: standart */
 import { useRender } from "@base-ui/react/use-render";
+import { type RegisterableHotkey, useHotkey } from "@tanstack/react-hotkeys";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 import { Input } from "@/components/ui/input";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipPositioner,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -81,20 +81,10 @@ function SidebarProvider({
   }, [setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
-        event.preventDefault();
-        toggleSidebar();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
+  useHotkey(
+    `Mod+${SIDEBAR_KEYBOARD_SHORTCUT}` as RegisterableHotkey,
+    toggleSidebar,
+  );
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -112,25 +102,23 @@ function SidebarProvider({
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delay={0}>
-        <div
-          data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
-          className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
-            className,
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      </TooltipProvider>
+      <div
+        data-slot="sidebar-wrapper"
+        style={
+          {
+            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            ...style,
+          } as React.CSSProperties
+        }
+        className={cn(
+          "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
     </SidebarContext.Provider>
   );
 }
@@ -219,20 +207,31 @@ function SidebarTrigger({
   const { toggleSidebar } = useSidebar();
 
   return (
-    <button
-      data-sidebar="trigger"
-      data-slot="sidebar-trigger"
-      className={cn(
-        sidebarMenuButtonVariants({ variant: "default", size: "sm" }),
-        "size-7 p-0 group-data-[collapsible=icon]:size-8! justify-center",
-        className,
-      )}
-      onClick={toggleSidebar}
-      {...props}
-    >
-      <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
-    </button>
+    <Tooltip>
+      <TooltipTrigger
+        data-sidebar="trigger"
+        data-slot="sidebar-trigger"
+        className={cn(
+          sidebarMenuButtonVariants({ variant: "default", size: "sm" }),
+          "size-7 p-0 group-data-[collapsible=icon]:size-8! justify-center",
+          className,
+        )}
+        onClick={toggleSidebar}
+        {...props}
+      >
+        <PanelLeftIcon />
+        <span className="sr-only">Toggle Sidebar</span>
+      </TooltipTrigger>
+      <TooltipPositioner side="bottom" sideOffset={8}>
+        <TooltipContent className="flex items-center gap-2">
+          Toggle Sidebar
+          <KbdGroup>
+            <Kbd>Ctrl</Kbd>
+            <Kbd>B</Kbd>
+          </KbdGroup>
+        </TooltipContent>
+      </TooltipPositioner>
+    </Tooltip>
   );
 }
 
