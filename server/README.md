@@ -137,3 +137,17 @@ export type App = typeof app;
 ### Viewing Backend Documentation
 Since we use the `@elysiajs/swagger` plugin, you can view the auto-generated interactive OpenAPI documentation by navigating to your local server (usually port 3000) when running:
 `http://localhost:3000/swagger`
+
+---
+
+## Deployment
+
+Because the server runs on Bun, deploying is as simple as compiling the project into a single executable binary. This bundles the backend code, Elysia, and Drizzle into one portable file that can be distributed.
+
+```bash
+cd server
+bun build src/index.ts --compile --outfile=poe2-server
+```
+
+You can then run `./poe2-server` (`poe2-server.exe` on Windows) on your target machine. 
+*Note: You will still need to provide the `.env` variables (like `DATABASE_URL` and `UPLOAD_DIR`) in the environment where the executable runs.*

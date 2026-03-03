@@ -2,6 +2,12 @@
 
 This workspace contains the frontend UI and the native desktop wrapper for the Path of Exile 2 Party Finder. 
 
+## Prerequisites for Native Development
+
+To run or build the Tauri desktop application, you must install the Rust compiler and OS-specific build dependencies.
+- **Windows**: Install the Microsoft C++ Build Tools and the WebView2 SDK.
+- **macOS / Linux**: Refer to the official [Tauri Prerequisites guide](https://v2.tauri.app/start/prerequisites/) for required packages.
+
 ## When to run commands in this folder
 You **must** `cd client` before running certain specific frontend tooling commands.
 
@@ -28,13 +34,13 @@ bun run tauri build
 ## Detailed Directory Structure
 
 - `src/` (The React Application)
-  - `components/`: Our isolated, reusable UI layer. We use ShadCN UI built on top of `@base-ui/react` primitives.
-  - `routes/`: File-based routing powered by **TanStack Router**. To add a new page, create a file here or use the `@tanstack/router-plugin` (which generates the route tree automatically).
+  - `components/`: Our isolated, reusable UI layer. We use ShadCN UI built on top of `@base-ui/react` primitives. It includes native-like components such as a custom frameless `title-bar.tsx` and a unified draggable `app-sidebar.tsx`.
+  - `routes/`: File-based routing powered by **TanStack Router**. `index.tsx` acts as the primary interactive dashboard.
   - `lib/`: Utility files.
     - `api.ts`: Here we configure our **Eden client**. It imports the `App` type from the `@poe2-party-finder/server` workspace. This is the magic that gives us autocomplete for our backend API.
 - `src-tauri/` (The Rust Desktop Wrapper)
-  - Contains `tauri.conf.json` which configures window dimensions, permissions, and app identity.
-  - Contains `src/main.rs` if we ever need to write custom Rust system-level plugins (e.g., global hotkeys, deeper OS integration).
+  - Contains `tauri.conf.json` which configures window dimensions, frameless window setup, permissions, and app identity.
+  - Contains `src/main.rs` which implements backend commands (e.g., `minimize_window`, `maximize_window`, `close_window`, `drag_window`) called by the custom React Titlebar to seamlessly control the OS window.
 - `vite.config.ts`: Configures the frontend bundler, Tailwind v4 plugin, and TanStack router plugin.
 
 ---

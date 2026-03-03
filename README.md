@@ -1,5 +1,16 @@
 # Path of Exile 2 Party Finder
 
+<div align="center">
+
+![Tauri](https://img.shields.io/badge/tauri-%2324C8DB.svg?style=for-the-badge&logo=tauri&logoColor=%23FFFFFF)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![ElysiaJS](https://img.shields.io/badge/elysia.js-F24E1E?style=for-the-badge&logo=elysiajs&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Biome](https://img.shields.io/badge/biome-60a5fa.svg?style=for-the-badge&logo=biome&logoColor=white)
+
+</div>
+
 A modern, full-stack monorepo application designed as a party finder for Path of Exile 2. This project is built with end-to-end type safety and packaged as a native desktop application.
 
 ## Monorepo Architecture Overview
@@ -28,6 +39,14 @@ If a command affects both parts of the app (like starting the whole project, or 
 - **Routing:** [TanStack Router](https://tanstack.com/router/latest)
 - **Data Fetching:** [TanStack Query](https://tanstack.com/query/latest)
 - **API Client:** Eden (`@elysiajs/eden`)
+
+---
+
+## Prerequisites
+
+- [Bun](https://bun.sh/) (v1.3.9 or higher is recommended)
+- A running PostgreSQL database (for the backend)
+- OS-specific build tools for Tauri (e.g., MSVC and Windows SDK on Windows). See the [Tauri Prerequisites Guide](https://v2.tauri.app/start/prerequisites/).
 
 ---
 
@@ -70,12 +89,18 @@ Runs TypeScript compiler checks (`tsc --noEmit`) concurrently on both workspaces
 
 ---
 
-## The "Post Board" Demo
+## Application Features
 
-Currently, the project contains a foundational **"Post Board" / Bulletin Board** feature. **This is intended purely as a demonstration** to show how all pieces of this stack interact.
+The project has evolved into a fully functional native desktop application featuring custom frameless window controls and dynamic routing. The core stack components seamlessly interact to provide a high-performance experience.
 
-1. **Database (`server/src/db`):** A `posts` table tracks properties.
-2. **Backend Engine (`server/src/index.ts`):** Exposes a `GET /posts` and `POST /posts` endpoint.
-3. **Frontend Implementation (`client/src/routes/posts-example.tsx`):**
-   - Uses Eden's type-safe `api.posts.post` mutation to send data.
-   - Tanstack Query refetches automatically to update the UI.
+1. **Native Desktop Integration (`client/src-tauri` / Frontend):**
+   - The application runs as a frameless native window powered by Tauri v2.
+   - Core window controls (Minimize, Maximize, Close) and dragging are implemented natively in Rust (`src-tauri/src/main.rs`) and triggered seamlessly via the frontend unified Titlebar and Sidebar components.
+
+2. **Frontend UI & Dashboard (`client/src/routes/index.tsx`):**
+   - A complex, interactive dashboard featuring dynamic filtering, price range controls, and categorizations.
+   - Built with Shadcn UI, structured responsive sidebars, and tailored Tailwind styling.
+
+3. **Database & API (`server/src`):**
+   - The database schemas natively support categories and post items (`posts`, `categories`), exposed via the `GET /posts` and `POST /posts` endpoints.
+   - The frontend consumes these using Eden's end-to-end type-safe `api.posts` and `api.categories` queries and mutations. TanStack Query automatically refetches to keep the dashboard instantly synchronized.
