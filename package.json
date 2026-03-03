@@ -12,6 +12,7 @@
     "db:generate": "cd server && bunx drizzle-kit generate",
     "db:migrate": "cd server && bunx drizzle-kit push",
     "db:studio": "cd server && bunx drizzle-kit studio",
+    "db:seed": "cd server && bun run src/db/seed.ts",
     "build:server": "cd server && bun build ./src/index.ts --compile --outfile server-build",
     "build:client": "cd client && bun run tauri build",
     "build": "bun run build:server && bun run build:client",
