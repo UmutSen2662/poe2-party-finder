@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, Search, Shield, X } from "lucide-react";
 import { useState } from "react";
@@ -24,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { api } from "@/lib/eden";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -40,6 +42,15 @@ function Index() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [currency, setCurrency] = useState("divine");
+
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await api.categories.get();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
     <div className="flex flex-col w-full bg-background text-foreground p-6 gap-6 max-w-4xl mx-auto">
@@ -157,18 +168,20 @@ function Index() {
                   className="flex flex-wrap justify-start gap-2"
                 >
                   <RadioPillGroupItem value="all">All</RadioPillGroupItem>
-                  <RadioPillGroupItem value="boss">
-                    Boss Carries
-                  </RadioPillGroupItem>
-                  <RadioPillGroupItem value="campaign">
-                    Campaign Progression
-                  </RadioPillGroupItem>
-                  <RadioPillGroupItem value="lab">
-                    Labyrinth Runs
-                  </RadioPillGroupItem>
-                  <RadioPillGroupItem value="crafting">
-                    Crafting Services
-                  </RadioPillGroupItem>
+                  {isLoadingCategories ? (
+                    <div className="text-sm text-muted-foreground py-1 px-3">
+                      Loading categories...
+                    </div>
+                  ) : (
+                    categories?.map((cat) => (
+                      <RadioPillGroupItem
+                        key={cat.id}
+                        value={cat.id.toString()}
+                      >
+                        {cat.displayName}
+                      </RadioPillGroupItem>
+                    ))
+                  )}
                 </RadioGroup>
               </div>
 
@@ -196,6 +209,7 @@ function Index() {
                       max={5}
                       step={0.5}
                       value={hostRating}
+                      showNotches
                       onValueChange={(val) =>
                         setHostRating(Array.isArray(val) ? [...val] : [val])
                       }

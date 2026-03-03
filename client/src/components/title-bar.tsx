@@ -12,7 +12,10 @@ export function TitleBar({ title }: { title: string }) {
       className="flex h-[48px] w-full shrink-0 relative z-50 items-center justify-end select-none bg-sidebar border-b"
     >
       {/* App Title */}
-      <div className="mr-auto flex items-center h-full pl-2 overflow-hidden">
+      <div
+        data-tauri-drag-region
+        className="mr-auto flex items-center h-full pl-2 overflow-hidden"
+      >
         <span
           data-tauri-drag-region
           className={`truncate font-semibold transition-all ease-in-out duration-200 ${

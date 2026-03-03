@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { HomeIcon, Mail, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 
 export function AppSidebar({ title }: { title: string }) {
+  const location = useLocation();
+
   return (
     <Sidebar collapsible="icon" className="select-none">
       <SidebarHeader data-tauri-drag-region className="border-b h-[48px]">
@@ -44,6 +46,7 @@ export function AppSidebar({ title }: { title: string }) {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Home"
+                  isActive={location.pathname === "/"}
                   render={<Link to="/" aria-label="Home" />}
                 >
                   <HomeIcon />
@@ -53,6 +56,7 @@ export function AppSidebar({ title }: { title: string }) {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Posts"
+                  isActive={location.pathname.startsWith("/posts")}
                   render={<Link to="/posts-example" aria-label="Posts" />}
                 >
                   <Mail />
