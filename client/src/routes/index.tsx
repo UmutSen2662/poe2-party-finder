@@ -42,7 +42,7 @@ function Index() {
   const [currency, setCurrency] = useState("divine");
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-background text-foreground p-6 gap-6 max-w-4xl mx-auto">
+    <div className="flex flex-col w-full bg-background text-foreground p-6 gap-6 max-w-4xl mx-auto">
       {/* Header Section */}
       <div className="flex items-center justify-between w-full pb-2 border-b border-border/40">
         <div className="flex items-center gap-3">

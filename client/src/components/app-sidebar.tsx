@@ -15,24 +15,32 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar() {
+export function AppSidebar({ title }: { title: string }) {
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="select-none">
+      <SidebarHeader data-tauri-drag-region className="border-b h-[48px]">
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center justify-between w-full">
-            <span className="truncate font-semibold group-data-[collapsible=icon]:hidden pl-2">
-              Path of Exile 2
+          <SidebarMenuItem
+            data-tauri-drag-region
+            className="flex items-center justify-between w-full h-full"
+          >
+            <span
+              data-tauri-drag-region
+              className="truncate font-semibold group-data-[collapsible=icon]:hidden pl-2"
+            >
+              {title}
             </span>
             <SidebarTrigger className="ml-auto size-8 cursor-pointer" />
           </SidebarMenuItem>
         </SidebarMenu>
-        <Separator />
       </SidebarHeader>
-      <SidebarContent className="overflow-x-hidden [&::-webkit-scrollbar]:hidden">
-        <SidebarGroup>
+      <SidebarContent
+        data-tauri-drag-region
+        className="overflow-x-hidden [&::-webkit-scrollbar]:hidden"
+      >
+        <SidebarGroup data-tauri-drag-region>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
+            <SidebarMenu data-tauri-drag-region className="gap-2">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Home"
@@ -55,8 +63,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <Separator />
+      <Separator />
+      <SidebarFooter data-tauri-drag-region>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -72,7 +80,6 @@ export function AppSidebar() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">Umut</span>
-                <span className="truncate text-xs">umut@example.com</span>
               </div>
               <div>
                 <Settings size={20} className="mr-1" />
