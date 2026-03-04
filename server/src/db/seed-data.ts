@@ -42,7 +42,7 @@ export const posts = {
     },
     {
       title: 5,
-      contnt: "221312",
+      content: "221312",
     },
   ],
 };
