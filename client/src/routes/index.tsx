@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Shield } from "lucide-react";
 import {
@@ -19,8 +19,24 @@ type ItemsSearch = {
   currency?: "divine" | "chaos";
 };
 
+const categoriesQuery = queryOptions({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const { data, error } = await api.categories.get();
+    if (error) throw error;
+    return data;
+  },
+});
+
 export const Route = createFileRoute("/")({
   component: Index,
+  loader: ({ context: { queryClient } }) =>
+    queryClient.ensureQueryData(categoriesQuery),
+  pendingComponent: () => (
+    <div className="flex items-center justify-center p-12 text-muted-foreground w-full h-full">
+      Loading services...
+    </div>
+  ),
   validateSearch: (search: Record<string, unknown>): ItemsSearch => {
     return {
       searchQuery: (search.searchQuery as string) || "",
@@ -46,14 +62,7 @@ function Index() {
   const searchParams = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const { data: categories, isLoading: isLoadingCategories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const { data, error } = await api.categories.get();
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: categories } = useSuspenseQuery(categoriesQuery);
 
   const handleSearchChange = (updates: Partial<SearchFilterState>) => {
     navigate({
@@ -95,7 +104,6 @@ function Index() {
         state={filterState}
         onChange={handleSearchChange}
         categories={categories}
-        isLoadingCategories={isLoadingCategories}
       />
     </div>
   );

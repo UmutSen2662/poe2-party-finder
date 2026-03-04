@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { CategorySchema } from "../../db/schema";
 import {
   createCategory,
   deleteCategory,
@@ -8,7 +9,9 @@ import {
 } from "./categories.service";
 
 export const categoriesRoutes = new Elysia({ prefix: "/categories" })
-  .get("/", () => getAllCategories())
+  .get("/", () => getAllCategories(), {
+    response: t.Array(CategorySchema),
+  })
   .post("/", ({ body }) => createCategory(body), {
     body: t.Object({
       displayName: t.String(),

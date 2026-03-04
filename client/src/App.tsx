@@ -15,10 +15,13 @@ const memoryHistory = createMemoryHistory({
   initialEntries: ["/"],
 });
 
-// Create a new router instance using the memory history and the generated tree
+// Create a new router instance using the memory history Component and inject the QueryClient
 const router = createRouter({
   routeTree,
   history: memoryHistory,
+  context: {
+    queryClient,
+  },
 });
 
 // Register the router instance for type safety

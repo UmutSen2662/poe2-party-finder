@@ -40,14 +40,12 @@ export interface SearchFilterState {
 export interface SearchFiltersProps {
   state: SearchFilterState;
   onChange: (updates: Partial<SearchFilterState>) => void;
-  isLoadingCategories: boolean;
-  categories: { id: string | number; displayName: string }[] | undefined;
+  categories: { id: string | number; displayName: string }[];
 }
 
 export function SearchFilters({
   state,
   onChange,
-  isLoadingCategories,
   categories,
 }: SearchFiltersProps) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
@@ -166,17 +164,11 @@ export function SearchFilters({
                 disabled={disabled}
               >
                 <RadioPillGroupItem value="all">All</RadioPillGroupItem>
-                {isLoadingCategories ? (
-                  <div className="text-sm text-muted-foreground py-1 px-3">
-                    Loading categories...
-                  </div>
-                ) : (
-                  categories?.map((cat) => (
-                    <RadioPillGroupItem key={cat.id} value={cat.id.toString()}>
-                      {cat.displayName}
-                    </RadioPillGroupItem>
-                  ))
-                )}
+                {categories.map((cat) => (
+                  <RadioPillGroupItem key={cat.id} value={cat.id.toString()}>
+                    {cat.displayName}
+                  </RadioPillGroupItem>
+                ))}
               </RadioGroup>
             </div>
 

@@ -44,6 +44,6 @@ bun run tauri build
 ## Frontend Tech Stack Deep Dive
 
 1. **Routing & State:** We use `@tanstack/react-router` configured with `createMemoryHistory` to avoid browser URL bar issues in our Tauri desktop environment. Our complex filtering state (search queries, prices, categories, and live search locking) is managed entirely via URL search parameters, ensuring type safety and persistence across navigation.
-2. **Data Fetching:** We use `@tanstack/react-query` to cache data (like service categories), handle loading states, and seamlessly interact with our API. 
+2. **Data Fetching (Suspense & Loaders):** We use `@tanstack/react-query` perfectly integrated with TanStack Router. We define query options (`queryOptions()`) and execute them inside the route's `loader` via `queryClient.ensureQueryData`. This parallelizes the data fetch with the component download ("Render-as-you-fetch" pattern). We then rely on TanStack Router's `pendingComponent` and React Query's `useSuspenseQuery` inside our pages to completely eliminate manual `isLoading` checks.
 3. **API Client:** We use the Eden client (`@elysiajs/eden`) to interact with our backend, providing end-to-end type safety directly from our server definitions without needing manual fetch calls.
 4. **Styling:** We use Tailwind CSS v4. All theme variables, base styles, and Tailwind configurations are explicitly consolidated into `src/shadcn.css` which serves as the single source of truth for the application's design system, keeping global styles clean and conflicts to a minimum.

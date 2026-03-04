@@ -6,6 +6,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-typebox";
 
 export const categoryStatusEnum = pgEnum("category_status", [
   "active",
@@ -25,3 +26,6 @@ export const categories = pgTable("categories", {
   imagePath: varchar("image_path", { length: 512 }),
   status: categoryStatusEnum("status").default("active").notNull(),
 });
+
+// Automatically generate a TypeBox schema representing a single category row
+export const CategorySchema = createSelectSchema(categories);
