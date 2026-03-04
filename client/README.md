@@ -12,17 +12,15 @@ To run or build the Tauri desktop application, you must install the Rust compile
 You **must** `cd client` before running certain specific frontend tooling commands.
 
 ### Adding Shadcn UI Components
-If you want to add new Shadcn UI components (buttons, dialogs, dropdowns, etc.), you **cannot** run the CLI tool from the monorepo root. You must be in this directory:
+If you want to add new Shadcn UI components, you **cannot** run the CLI tool from the monorepo root. You must be in this directory:
 
 ```bash
 cd client
 bunx shadcn@latest add dialog
-bunx shadcn@latest add dropdown-menu
 ```
-*Note: We are using Tailwind CSS v4 and React 19, so ensure you don't downgrade packages accidentally.*
+*Note: We are using Tailwind CSS v4 and React 19.*
 
-### Building the Desktop App (Release Mode)
-To compile a final `.exe` (or `.app` on macOS) for distribution:
+### Building the Desktop App
 ```bash
 cd client
 bun run tauri build
@@ -34,26 +32,18 @@ bun run tauri build
 ## Detailed Directory Structure
 
 - `src/` (The React Application)
-  - `components/`: Our isolated, reusable UI layer. We use ShadCN UI built on top of `@base-ui/react` primitives. It includes native-like components such as a custom frameless `title-bar.tsx` and a unified draggable `app-sidebar.tsx`.
-  - `routes/`: File-based routing powered by **TanStack Router**. `index.tsx` acts as the primary interactive dashboard.
-  - `lib/`: Utility files.
-    - `api.ts`: Here we configure our **Eden client**. It imports the `App` type from the `@poe2-party-finder/server` workspace. This is the magic that gives us autocomplete for our backend API.
+  - `components/`: Our isolated, reusable UI layer using ShadCN UI. Includes extracted domain components like `search-filters.tsx` and `currency-badge.tsx`, as well as a native-like frameless `title-bar.tsx` and `app-sidebar.tsx`.
+  - `routes/`: File-based routing powered by **TanStack Router**. `index.tsx` acts as the primary interactive dashboard. State is heavily driven by URL search parameters for persistence.
+  - `lib/`: Utility files including `api.ts` which configures our **Eden client** for fully-typed backend communication.
 - `src-tauri/` (The Rust Desktop Wrapper)
-  - Contains `tauri.conf.json` which configures window dimensions, frameless window setup, permissions, and app identity.
-  - Contains `src/main.rs` which implements backend commands (e.g., `minimize_window`, `maximize_window`, `close_window`, `drag_window`) called by the custom React Titlebar to seamlessly control the OS window.
+  - Contains `tauri.conf.json` and `src/main.rs`. Implements backend commands called by the React Titlebar to seamlessly control the OS window.
 - `vite.config.ts`: Configures the frontend bundler, Tailwind v4 plugin, and TanStack router plugin.
 
 ---
 
 ## Frontend Tech Stack Deep Dive
 
-1. **Routing:** We use `@tanstack/react-router`. It is completely fully-typed. If you link to a page that doesn't exist, or pass the wrong search parameters, TypeScript will throw an error.
-2. **Data Fetching:** We use `@tanstack/react-query` to cache data, handle loading states, and retry failed requests. 
-3. **API Client:** We do not use `fetch` or `axios`. We use the Eden client (`@elysiajs/eden`).
-   ```typescript
-   import { api } from "@/lib/api"; // Points to our server
-
-   // Automatically knows the exact shape of the response and required body parameters
-   const { data, error } = await api.users.get({ query: { id: 1 } });
-   ```
-4. **Styling:** We use the Tailwind CSS v4, which is configured via CSS (`src/index.css`) rather than a `tailwind.config.ts` file.
+1. **Routing & State:** We use `@tanstack/react-router` configured with `createMemoryHistory` to avoid browser URL bar issues in our Tauri desktop environment. Our complex filtering state (search queries, prices, categories, and live search locking) is managed entirely via URL search parameters, ensuring type safety and persistence across navigation.
+2. **Data Fetching:** We use `@tanstack/react-query` to cache data (like service categories), handle loading states, and seamlessly interact with our API. 
+3. **API Client:** We use the Eden client (`@elysiajs/eden`) to interact with our backend, providing end-to-end type safety directly from our server definitions without needing manual fetch calls.
+4. **Styling:** We use Tailwind CSS v4. All theme variables, base styles, and Tailwind configurations are explicitly consolidated into `src/shadcn.css` which serves as the single source of truth for the application's design system, keeping global styles clean and conflicts to a minimum.
