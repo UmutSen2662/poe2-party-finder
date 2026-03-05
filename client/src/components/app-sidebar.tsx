@@ -15,7 +15,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar({ title }: { title: string }) {
+export function AppSidebar() {
   const location = useLocation();
 
   return (
@@ -26,12 +26,6 @@ export function AppSidebar({ title }: { title: string }) {
             data-tauri-drag-region
             className="flex items-center justify-between w-full h-full"
           >
-            <span
-              data-tauri-drag-region
-              className="truncate font-semibold group-data-[collapsible=icon]:hidden pl-2"
-            >
-              {title}
-            </span>
             <SidebarTrigger className="ml-auto size-8 cursor-pointer" />
           </SidebarMenuItem>
         </SidebarMenu>

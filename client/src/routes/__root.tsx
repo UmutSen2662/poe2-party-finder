@@ -7,8 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const title = "Pact of Exile";
-
 interface MyRouterContext {
   queryClient: QueryClient;
 }
@@ -18,9 +16,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <TooltipProvider delay={200}>
         <SidebarProvider className="w-screen h-screen">
-          <AppSidebar title={title} />
-          <div className="flex flex-col flex-1 h-full min-w-0 min-h-0 relative z-0">
-            <TitleBar title={title} />
+          <AppSidebar />
+          <div className="flex flex-col flex-1 h-full min-w-0 min-h-0">
+            <TitleBar />
             <ScrollArea className="flex-1 min-h-0 w-full relative">
               <Outlet />
             </ScrollArea>

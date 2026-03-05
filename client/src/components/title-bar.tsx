@@ -10,8 +10,9 @@ import {
   TooltipPositioner,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-export function TitleBar({ title }: { title: string }) {
+export function TitleBar() {
   const appWindow = getCurrentWindow();
   const { state } = useSidebar();
   const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
@@ -48,19 +49,15 @@ export function TitleBar({ title }: { title: string }) {
     >
       {/* App Title */}
       <div
-        data-tauri-drag-region
-        className="mr-auto flex items-center h-full pl-2 overflow-hidden"
+        className={cn(
+          "fixed top-0 pointer-events-none transition-all duration-200 ease-in-out",
+          "flex items-center h-[48px]",
+          state === "collapsed"
+            ? "left-[calc(var(--sidebar-width-icon)+0.5rem)]"
+            : "left-4",
+        )}
       >
-        <span
-          data-tauri-drag-region
-          className={`truncate font-semibold transition-all ease-in-out duration-200 ${
-            state === "collapsed"
-              ? "translate-x-0"
-              : "-translate-x-[10rem] pointer-events-none"
-          }`}
-        >
-          {title}
-        </span>
+        <span className="truncate font-semibold">Pact of Exile</span>
       </div>
 
       {/* Window Controls */}
