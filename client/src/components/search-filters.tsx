@@ -147,11 +147,11 @@ export function SearchFilters({
       {/* Expandable Filter Section */}
       <CollapsibleContent>
         <Card
-          className={`mt-2 border-border/50 transition-opacity ${
+          className={`border-border/50 transition-opacity ${
             disabled ? "opacity-50 pointer-events-none" : "bg-card/50"
           }`}
         >
-          <CardContent className="flex flex-col gap-8">
+          <CardContent className="flex flex-col gap-6">
             {/* Filter Row 1: Category */}
             <div className="flex flex-col gap-4">
               <div className="text-muted-foreground font-medium text-xs tracking-wider">
@@ -174,11 +174,11 @@ export function SearchFilters({
 
             <Separator />
 
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-8">
-              {/* Filter Row 2: Provider Requirements */}
-              <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-6">
+              {/* Filter Row 2: Host Requirements */}
+              <div className="flex flex-col gap-4">
                 <div className="text-muted-foreground font-medium text-xs tracking-wider">
-                  Provider Requirements
+                  Host Requirements
                 </div>
 
                 <Field>
@@ -192,7 +192,6 @@ export function SearchFilters({
                   </div>
                   <Slider
                     id="host-rating"
-                    defaultValue={[2.5]}
                     max={5}
                     step={0.5}
                     value={[state.hostRating]}
@@ -220,16 +219,14 @@ export function SearchFilters({
                     }
                     disabled={disabled}
                   />
-                  <Label htmlFor="include-unrated">
-                    Include Unrated/New Hosts
-                  </Label>
+                  <Label htmlFor="include-unrated">Include New Hosts</Label>
                 </div>
               </div>
 
               <Separator orientation="vertical" />
 
               {/* Filter Row 2: Pricing */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div className="text-muted-foreground font-medium text-xs tracking-wider">
                     Pricing
@@ -240,7 +237,7 @@ export function SearchFilters({
                     onClick={() => {
                       onChange({ minPrice: "", maxPrice: "" });
                     }}
-                    className="text-xs p-1 h-auto"
+                    className="text-xs px-1 h-auto"
                     disabled={disabled}
                   >
                     Clear
@@ -248,42 +245,26 @@ export function SearchFilters({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel
-                      htmlFor="min-price"
-                      className="text-xs text-muted-foreground mb-1"
-                    >
-                      Min Price
-                    </FieldLabel>
-                    <Input
-                      id="min-price"
-                      type="number"
-                      placeholder="Min"
-                      value={state.minPrice}
-                      onChange={(e) => onChange({ minPrice: e.target.value })}
-                      className="bg-background no-spinner"
-                      autoComplete="off"
-                      disabled={disabled}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel
-                      htmlFor="max-price"
-                      className="text-xs text-muted-foreground mb-1"
-                    >
-                      Max Price
-                    </FieldLabel>
-                    <Input
-                      id="max-price"
-                      type="number"
-                      placeholder="Max"
-                      value={state.maxPrice}
-                      onChange={(e) => onChange({ maxPrice: e.target.value })}
-                      className="bg-background no-spinner"
-                      autoComplete="off"
-                      disabled={disabled}
-                    />
-                  </Field>
+                  <Input
+                    id="min-price"
+                    type="number"
+                    placeholder="Min"
+                    value={state.minPrice}
+                    onChange={(e) => onChange({ minPrice: e.target.value })}
+                    className="bg-background no-spinner"
+                    autoComplete="off"
+                    disabled={disabled}
+                  />
+                  <Input
+                    id="max-price"
+                    type="number"
+                    placeholder="Max"
+                    value={state.maxPrice}
+                    onChange={(e) => onChange({ maxPrice: e.target.value })}
+                    className="bg-background no-spinner"
+                    autoComplete="off"
+                    disabled={disabled}
+                  />
                 </div>
 
                 <Field>

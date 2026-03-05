@@ -40,7 +40,8 @@ export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): ItemsSearch => {
     return {
       searchQuery: (search.searchQuery as string) || "",
-      hostRating: Number(search.hostRating) || 4.5,
+      hostRating:
+        search.hostRating !== undefined ? Number(search.hostRating) : 4,
       includeUnrated:
         search.includeUnrated !== undefined
           ? (search.includeUnrated as boolean)
@@ -73,7 +74,7 @@ function Index() {
 
   const filterState: SearchFilterState = {
     searchQuery: searchParams.searchQuery || "",
-    hostRating: searchParams.hostRating || 4.5,
+    hostRating: searchParams.hostRating ?? 4,
     includeUnrated: searchParams.includeUnrated ?? true,
     liveSearchEnabled: searchParams.liveSearchEnabled ?? false,
     category: searchParams.category || "all",
