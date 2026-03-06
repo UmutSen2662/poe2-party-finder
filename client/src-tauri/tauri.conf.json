@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "client",
+  "productName": "Pact of Exile",
   "version": "0.1.0",
-  "identifier": "com.umut.client",
+  "identifier": "com.umut.pactofexile",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,11 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "client",
-        "width": 800,
-        "height": 640,
-        "minWidth": 800,
-        "minHeight": 640,
+        "title": "Pact of Exile",
+        "minWidth": 720,
+        "minHeight": 480,
         "decorations": false
       }
     ],

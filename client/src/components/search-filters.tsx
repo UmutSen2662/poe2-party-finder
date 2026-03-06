@@ -89,7 +89,7 @@ export function SearchFilters({
             onValueChange={(val) => onChange({ league: val || "" })}
             disabled={disabled}
           >
-            <SelectTrigger className="w-[200px] bg-card">
+            <SelectTrigger className="w-[180px] bg-card">
               <SelectValue placeholder="Select League" />
             </SelectTrigger>
             <SelectPositioner>

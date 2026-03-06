@@ -1,4 +1,3 @@
-import { Link, useLocation } from "@tanstack/react-router";
 import { HomeIcon, Mail, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -15,9 +14,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar() {
-  const location = useLocation();
+interface AppSidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
 
+export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" className="select-none">
       <SidebarHeader data-tauri-drag-region className="border-b h-[48px]">
@@ -40,8 +42,8 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Home"
-                  isActive={location.pathname === "/"}
-                  render={<Link to="/" aria-label="Home" />}
+                  isActive={activeTab === "home"}
+                  onClick={() => setActiveTab("home")}
                 >
                   <HomeIcon />
                   <span>Home</span>
@@ -50,8 +52,8 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Posts"
-                  isActive={location.pathname.startsWith("/posts")}
-                  render={<Link to="/posts-example" aria-label="Posts" />}
+                  isActive={activeTab === "posts"}
+                  onClick={() => setActiveTab("posts")}
                 >
                   <Mail />
                   <span>Posts</span>
@@ -68,9 +70,9 @@ export function AppSidebar() {
             <SidebarMenuButton
               size="lg"
               tooltip="Settings"
+              isActive={activeTab === "settings"}
+              onClick={() => setActiveTab("settings")}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              // @ts-expect-error The settings route hasn't been created yet but the user just wants to preview the UI
-              render={<Link to="/settings" />}
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src="https://github.com/shadcn.png" alt="Umut" />

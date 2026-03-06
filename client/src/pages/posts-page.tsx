@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/eden";
 
-export const Route = createFileRoute("/posts-example")({
-  component: PostsBoard,
-});
-
-function PostsBoard() {
+export function PostsPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -55,7 +50,7 @@ function PostsBoard() {
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8">
+    <div className="flex flex-col gap-8 max-w-2xl mx-auto w-full p-8 overflow-y-auto h-full">
       <Card>
         <CardHeader>
           <CardTitle>Create a new Post</CardTitle>
@@ -104,24 +99,31 @@ function PostsBoard() {
             No posts yet. Be the first to create one!
           </div>
         ) : (
-          posts?.map((post) => (
-            <Card
-              key={post.id}
-              className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <CardHeader>
-                <CardTitle className="text-xl">{post.title}</CardTitle>
-                <CardDescription>
-                  Posted on {new Date(post.createdAt).toLocaleString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="leading-relaxed text-card-foreground">
-                  {post.content}
-                </p>
-              </CardContent>
-            </Card>
-          ))
+          posts?.map(
+            (post: {
+              id: string | number;
+              title: string;
+              content: string;
+              createdAt: string | Date;
+            }) => (
+              <Card
+                key={post.id}
+                className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <CardHeader>
+                  <CardTitle className="text-xl">{post.title}</CardTitle>
+                  <CardDescription>
+                    Posted on {new Date(post.createdAt).toLocaleString()}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="leading-relaxed text-card-foreground">
+                    {post.content}
+                  </p>
+                </CardContent>
+              </Card>
+            ),
+          )
         )}
       </div>
     </div>
