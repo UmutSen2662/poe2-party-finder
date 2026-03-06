@@ -1,40 +1,82 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  createMemoryHistory,
-  createRouter,
-  RouterProvider,
-} from "@tanstack/react-router";
+import { Activity, Suspense, useState } from "react";
+import { Layout } from "./layout";
 import { queryClient } from "./lib/queryClient";
+import { PostsPage } from "./pages/posts-page";
+import { SearchPage } from "./pages/search-page";
 import "./App.css";
 
-// Import the auto-generated route tree
-import { routeTree } from "./routeTree.gen";
+type KeepAliveMode = "unmount" | "activity" | "hide";
 
-// Create a memory history instance (critical for Tauri, avoiding browser URL dependency)
-const memoryHistory = createMemoryHistory({
-  initialEntries: ["/"],
-});
+interface TabPageProps {
+  currentTab: string;
+  tabId: string;
+  mode?: KeepAliveMode;
+  children: React.ReactNode;
+}
 
-// Create a new router instance using the memory history Component and inject the QueryClient
-const router = createRouter({
-  routeTree,
-  history: memoryHistory,
-  context: {
-    queryClient,
-  },
-});
+function TabPage({
+  currentTab,
+  tabId,
+  mode = "unmount",
+  children,
+}: TabPageProps) {
+  const isActive = currentTab === tabId;
 
-// Register the router instance for type safety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
+  if (mode === "unmount") {
+    return isActive ? children : null;
   }
+
+  if (mode === "activity") {
+    return (
+      <Activity mode={isActive ? "visible" : "hidden"}>{children}</Activity>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: isActive ? "block" : "none",
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Temporary mock pages
+function SettingsPage() {
+  return <div className="p-6">Settings Content Here</div>;
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState("home");
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center p-12 text-muted-foreground w-full h-full">
+              Loading services...
+            </div>
+          }
+        >
+          <TabPage currentTab={activeTab} tabId="home" mode="hide">
+            <SearchPage />
+          </TabPage>
+
+          <TabPage currentTab={activeTab} tabId="posts" mode="unmount">
+            <PostsPage />
+          </TabPage>
+
+          <TabPage currentTab={activeTab} tabId="settings" mode="unmount">
+            <SettingsPage />
+          </TabPage>
+        </Suspense>
+      </Layout>
     </QueryClientProvider>
   );
 }

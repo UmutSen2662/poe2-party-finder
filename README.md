@@ -36,7 +36,7 @@ If a command affects both parts of the app (like starting the whole project, or 
 - **Desktop Wrapper:** [Tauri v2](https://v2.tauri.app/)
 - **Package Bundler:** [Vite v7](https://vitejs.dev/)
 - **UI & Styling:** React 19 + Tailwind CSS v4 + ShadCN UI
-- **Routing:** [TanStack Router](https://tanstack.com/router/latest)
+- **Routing:** Custom React Tab System (Optimized for State Persistence)
 - **Data Fetching:** [TanStack Query](https://tanstack.com/query/latest)
 - **API Client:** Eden (`@elysiajs/eden`)
 
