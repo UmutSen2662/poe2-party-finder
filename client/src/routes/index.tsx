@@ -1,6 +1,5 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Shield } from "lucide-react";
 import {
   type SearchFilterState,
   SearchFilters,
@@ -86,21 +85,6 @@ function Index() {
 
   return (
     <div className="flex flex-col gap-6 p-6 w-full max-w-3xl mx-auto">
-      {/* Header Section */}
-      <div className="flex items-center justify-between w-full pb-2 border-b border-border/40">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-md text-primary">
-            <Shield className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Path of Exile 2 Services
-          </h1>
-        </div>
-        <div className="text-sm text-muted-foreground font-medium">
-          6,421 Services Active
-        </div>
-      </div>
-
       <SearchFilters
         state={filterState}
         onChange={handleSearchChange}
