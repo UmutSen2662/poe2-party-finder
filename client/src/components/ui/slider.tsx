@@ -38,7 +38,7 @@ function Slider({
       )}
       {...props}
     >
-      <SliderPrimitive.Control className="grid grow data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5">
+      <SliderPrimitive.Control className="grid grow data-[orientation=horizontal]:h-2 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5">
         <SliderPrimitive.Track
           data-slot="slider-track"
           className={cn(
@@ -61,8 +61,8 @@ function Slider({
                     <div
                       key={i}
                       className={cn(
-                        "absolute bg-foreground/50 dark:bg-background/50",
-                        isVertical ? "h-0.5 w-full" : "w-0.5 h-full",
+                        "absolute bg-card first:opacity-0 last:opacity-0",
+                        isVertical ? "h-1 w-full" : "w-1 h-full",
                       )}
                       style={{
                         left: isVertical ? undefined : `${percent}%`,

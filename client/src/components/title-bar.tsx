@@ -68,8 +68,8 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={toggleAlwaysOnTop}
-            className={`inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-white/10 transition-all duration-200 cursor-default ${
-              isAlwaysOnTop ? "text-white opacity-100" : ""
+            className={`inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 cursor-default ${
+              isAlwaysOnTop ? "text-foreground opacity-100" : ""
             }`}
           >
             <Pin
@@ -96,7 +96,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={() => appWindow.minimize()}
-            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-white/10 hover:text-white transition-colors cursor-default"
+            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
           >
             <Minus strokeWidth={1.5} size={16} />
           </TooltipTrigger>
@@ -111,7 +111,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={() => appWindow.toggleMaximize()}
-            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-white/10 hover:text-white transition-colors cursor-default"
+            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
           >
             {isMaximized ? (
               <Copy

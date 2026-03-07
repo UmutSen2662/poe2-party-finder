@@ -1,4 +1,5 @@
 import { AppSidebar } from "./components/app-sidebar";
+import { GlobalHotkeys } from "./components/global-hotkeys";
 import { ThemeProvider } from "./components/theme-provider";
 import { TitleBar } from "./components/title-bar";
 import { ScrollArea } from "./components/ui/scroll-area";
@@ -14,6 +15,7 @@ interface LayoutProps {
 export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <GlobalHotkeys />
       <TooltipProvider delay={200}>
         <SidebarProvider className="w-screen h-screen">
           <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />

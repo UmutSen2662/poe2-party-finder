@@ -147,7 +147,7 @@ export function SearchFilters({
       {/* Expandable Filter Section */}
       <CollapsibleContent>
         <Card
-          className={`border-border/50 transition-opacity ${
+          className={`border-border transition-opacity ${
             disabled ? "opacity-50 pointer-events-none" : "bg-card/50"
           }`}
         >

@@ -4,6 +4,8 @@ import { Layout } from "./layout";
 import { queryClient } from "./lib/queryClient";
 import { PostsPage } from "./pages/posts-page";
 import { SearchPage } from "./pages/search-page";
+import { SettingsPage } from "./pages/settings-page";
+import { TestPage } from "./pages/test-page";
 import "./App.css";
 
 type KeepAliveMode = "unmount" | "activity" | "hide";
@@ -46,11 +48,6 @@ function TabPage({
   );
 }
 
-// Temporary mock pages
-function SettingsPage() {
-  return <div className="p-6">Settings Content Here</div>;
-}
-
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
 
@@ -70,6 +67,10 @@ export default function App() {
 
           <TabPage currentTab={activeTab} tabId="posts" mode="unmount">
             <PostsPage />
+          </TabPage>
+
+          <TabPage currentTab={activeTab} tabId="test" mode="unmount">
+            <TestPage />
           </TabPage>
 
           <TabPage currentTab={activeTab} tabId="settings" mode="unmount">

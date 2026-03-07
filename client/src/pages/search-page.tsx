@@ -35,7 +35,10 @@ export function SearchPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 w-full max-w-3xl mx-auto">
+    <div className="flex flex-col gap-6 p-6 w-full max-w-4xl mx-auto">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight">Party Services</h1>
+      </header>
       <SearchFilters
         state={filterState}
         onChange={handleSearchChange}

@@ -104,3 +104,13 @@ The project has evolved into a fully functional native desktop application featu
 3. **Database & API (`server/src`):**
    - The database schemas natively support categories and post items (`posts`, `categories`), exposed via the `GET /posts` and `POST /posts` endpoints.
    - The frontend consumes these using Eden's end-to-end type-safe `api.posts` and `api.categories` queries and mutations. TanStack Query automatically refetches to keep the dashboard instantly synchronized.
+
+4. **Test Playground & Markdown Editor (`client/src/pages/test-page.tsx`):**
+   - An isolated environment for prototyping components.
+   - Features a dual-pane raw Markdown Editor utilizing `react-markdown` and `@tailwindcss/typography` to preview rich post descriptions.
+
+5. **Keyboard Navigation (`client/src/components/global-hotkeys.tsx`):**
+   - Built-in shortcuts for power users powered by `@tanstack/react-hotkeys`.
+   - `Ctrl+Shift+D` to toggle light/dark theme.
+   - `Ctrl+Shift+T` to toggle always-on-top.
+   - `Ctrl+1` through `Ctrl+4` for rapid sidebar tab navigation.

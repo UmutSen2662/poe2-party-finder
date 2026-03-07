@@ -1,5 +1,7 @@
-import { HomeIcon, Mail, Settings } from "lucide-react";
+import { useHotkey } from "@tanstack/react-hotkeys";
+import { FlaskConical, HomeIcon, Mail, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -20,6 +22,12 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
+  // Navigation Hotkeys
+  useHotkey("Mod+1", () => setActiveTab("home"));
+  useHotkey("Mod+2", () => setActiveTab("posts"));
+  useHotkey("Mod+3", () => setActiveTab("test"));
+  useHotkey("Mod+4", () => setActiveTab("settings"));
+
   return (
     <Sidebar collapsible="icon" className="select-none">
       <SidebarHeader data-tauri-drag-region className="border-b h-[48px]">
@@ -41,7 +49,17 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
             <SidebarMenu data-tauri-drag-region className="gap-2">
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  tooltip="Home"
+                  tooltip={{
+                    children: (
+                      <div className="flex items-center gap-2">
+                        Home
+                        <KbdGroup>
+                          <Kbd>Ctrl</Kbd>
+                          <Kbd>1</Kbd>
+                        </KbdGroup>
+                      </div>
+                    ),
+                  }}
                   isActive={activeTab === "home"}
                   onClick={() => setActiveTab("home")}
                 >
@@ -51,12 +69,42 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  tooltip="Posts"
+                  tooltip={{
+                    children: (
+                      <div className="flex items-center gap-2">
+                        Posts
+                        <KbdGroup>
+                          <Kbd>Ctrl</Kbd>
+                          <Kbd>2</Kbd>
+                        </KbdGroup>
+                      </div>
+                    ),
+                  }}
                   isActive={activeTab === "posts"}
                   onClick={() => setActiveTab("posts")}
                 >
                   <Mail />
                   <span>Posts</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={{
+                    children: (
+                      <div className="flex items-center gap-2">
+                        Test
+                        <KbdGroup>
+                          <Kbd>Ctrl</Kbd>
+                          <Kbd>3</Kbd>
+                        </KbdGroup>
+                      </div>
+                    ),
+                  }}
+                  isActive={activeTab === "test"}
+                  onClick={() => setActiveTab("test")}
+                >
+                  <FlaskConical />
+                  <span>Test</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -69,7 +117,17 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              tooltip="Settings"
+              tooltip={{
+                children: (
+                  <div className="flex items-center gap-2">
+                    Settings
+                    <KbdGroup>
+                      <Kbd>Ctrl</Kbd>
+                      <Kbd>4</Kbd>
+                    </KbdGroup>
+                  </div>
+                ),
+              }}
               isActive={activeTab === "settings"}
               onClick={() => setActiveTab("settings")}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"

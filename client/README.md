@@ -33,7 +33,7 @@ bun run tauri build
 
 - `src/` (The React Application)
   - `components/`: Our isolated, reusable UI layer using ShadCN UI. Includes extracted domain components like `search-filters.tsx` and `currency-badge.tsx`, as well as a native-like frameless `title-bar.tsx` and `app-sidebar.tsx`.
-  - `pages/`: Page-level feature components like `search-page.tsx` and `posts-page.tsx`.
+  - `pages/`: Page-level feature components like `search-page.tsx`, `posts-page.tsx`, and the `test-page.tsx` Markdown playground.
   - `app.tsx`: The primary application shell containing our bespoke `<TabPage>` component which implements routing via CSS display toggling to persist UI state.
   - `lib/`: Utility files including `eden.ts` which configures our **Eden client** for fully-typed backend communication.
 - `src-tauri/` (The Rust Desktop Wrapper)
@@ -48,3 +48,4 @@ bun run tauri build
 2. **Data Fetching (Suspense & Queries):** We use `@tanstack/react-query` combined with React's native `<Suspense>`. We utilize `useSuspenseQuery` or standard `useQuery` inside our `pages/` to eliminate manual unhandled loading states. Our architecture dictates that reference data (e.g., categories) relies entirely on TanStack query caching.
 3. **API Client:** We use the Eden client (`@elysiajs/eden`) to interact with our backend, providing end-to-end type safety directly from our server definitions without needing manual fetch calls.
 4. **Styling:** We use Tailwind CSS v4. All theme variables, base styles, and Tailwind configurations are explicitly consolidated into `src/shadcn.css` which serves as the single source of truth for the application's design system, keeping global styles clean and conflicts to a minimum.
+5. **Keyboard Navigation:** We use `@tanstack/react-hotkeys` to provide standard desktop shortcuts (e.g., `Ctrl+1` through `Ctrl+4` to navigate Sidebar tabs, and `Ctrl+Shift+D` for theme toggling). These shortcuts are visually reinforced using custom `<Kbd>` tooltip components.
