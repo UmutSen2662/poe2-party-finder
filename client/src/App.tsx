@@ -69,7 +69,7 @@ export default function App() {
             <PostsPage />
           </TabPage>
 
-          <TabPage currentTab={activeTab} tabId="test" mode="unmount">
+          <TabPage currentTab={activeTab} tabId="test" mode="hide">
             <TestPage />
           </TabPage>
 

@@ -20,3 +20,13 @@
     display: none;
   }
 }
+
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+.prose blockquote p::before,
+.prose blockquote p::after {
+  content: none;
+}

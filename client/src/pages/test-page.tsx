@@ -1,6 +1,4 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import {
   Card,
   CardContent,
@@ -8,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Markdown, MarkdownGuideDialog } from "@/components/ui/markdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -48,12 +47,10 @@ export function TestPage() {
 
               <TabsContent
                 value="preview"
-                className="flex-1 min-h-0 mt-0 overflow-y-auto rounded-md border bg-muted/30 p-4 prose prose-neutral dark:prose-invert prose-sm min-w-full"
+                className="flex-1 min-h-0 mt-0 overflow-y-auto rounded-md border bg-white dark:bg-black p-4 prose prose-neutral dark:prose-invert prose-sm min-w-full"
               >
                 {markdown ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {markdown}
-                  </ReactMarkdown>
+                  <Markdown content={markdown} />
                 ) : (
                   <p className="text-muted-foreground italic mt-0">
                     Nothing to preview yet...
@@ -64,72 +61,22 @@ export function TestPage() {
           </CardContent>
         </Card>
 
-        {/* The Instructions/Preview Area */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-lg">Markdown Formatting Guide</CardTitle>
-            <CardDescription>
-              We support standard Discord/Reddit style Markdown to help your
-              posts stand out!
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-center p-3 rounded-md bg-background border">
-                <span className="font-mono text-sm text-muted-foreground">
-                  **Bold**
-                </span>
-                <span className="font-bold">Bold Text</span>
-              </div>
-
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-center p-3 rounded-md bg-background border">
-                <span className="font-mono text-sm text-muted-foreground">
-                  *Italic*
-                </span>
-                <span className="italic">Italic Text</span>
-              </div>
-
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-center p-3 rounded-md bg-background border">
-                <span className="font-mono text-sm text-muted-foreground">
-                  __Underline__
-                </span>
-                <span className="underline">Underlined Text</span>
-              </div>
-
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-center p-3 rounded-md bg-background border">
-                <span className="font-mono text-sm text-muted-foreground">
-                  ~~Strike~~
-                </span>
-                <span className="line-through">Strikethrough</span>
-              </div>
-
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-start p-3 rounded-md bg-background border">
-                <div className="flex flex-col gap-1">
-                  <span className="font-mono text-sm text-muted-foreground">
-                    &gt; Quote
-                  </span>
-                </div>
-                <div className="border-l-4 border-primary pl-4 py-1 text-muted-foreground italic">
-                  This is a blockquote. Use it to quote other players or
-                  emphasize a specific rule.
-                </div>
-              </div>
-
-              <div className="grid grid-cols-[100px_1fr] gap-4 items-center p-3 rounded-md bg-background border">
-                <span className="font-mono text-sm text-muted-foreground">
-                  `Code`
-                </span>
-                <span>
-                  Use{" "}
-                  <code className="bg-muted px-[0.3rem] py-[0.2rem] rounded text-sm font-mono text-foreground font-semibold">
-                    inline code
-                  </code>{" "}
-                  for items or specific builds.
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* The Instructions/Preview Area (Now a Dialog) */}
+        <div className="flex flex-col gap-4">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                Need help with Markdown?
+              </CardTitle>
+              <CardDescription>
+                We now have a reusable modal perfect for any text editor.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MarkdownGuideDialog />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
