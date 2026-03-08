@@ -1,6 +1,18 @@
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { Info } from "lucide-react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,77 +29,134 @@ interface MarkdownProps {
 }
 
 export function Markdown({ content, className = "" }: MarkdownProps) {
+  const [linkToConfirm, setLinkToConfirm] = useState<string | null>(null);
+
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href?: string,
+  ) => {
+    if (!href) return;
+
+    // Check if it's an external link (http/https)
+    if (href.startsWith("http://") || href.startsWith("https://")) {
+      e.preventDefault();
+      setLinkToConfirm(href);
+    }
+  };
+
+  const handleConfirmLink = async () => {
+    if (linkToConfirm) {
+      try {
+        await openUrl(linkToConfirm);
+      } catch (error) {
+        console.error("Failed to open link:", error);
+      }
+      setLinkToConfirm(null);
+    }
+  };
+
   return (
-    <div
-      className={`prose prose-neutral dark:prose-invert prose-sm min-w-full ${className}`}
-    >
-      <ReactMarkdown
-        // Use remarkGfm to support basic tables, tasks, etc...
-        remarkPlugins={[remarkGfm]}
-        // ...but manually strip out tables and task list checkboxes if desired
-        disallowedElements={[
-          "table",
-          "thead",
-          "tbody",
-          "tr",
-          "th",
-          "td",
-          "input",
-        ]}
-        components={{
-          // Intercept links to look like shadcn buttons/links
-          a: ({ node, ...props }) => (
-            <a
-              className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
-              target="_blank"
-              rel="noreferrer"
-              {...props}
-            />
-          ),
-          // Intercept blockquotes to give them a primary colored border
-          blockquote: ({ node, ...props }) => (
-            <blockquote
-              className="border-l-4 border-primary pl-3 not-italic"
-              {...props}
-            />
-          ),
-          // Intercept code to look like shadcn inline code or code blocks
-          code: ({ node, className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline = !match;
-            if (isInline) {
+    <>
+      <div
+        className={`prose prose-neutral dark:prose-invert prose-sm min-w-full ${className}`}
+      >
+        <ReactMarkdown
+          // Use remarkGfm to support basic tables, tasks, etc...
+          remarkPlugins={[remarkGfm]}
+          // ...but manually strip out tables and task list checkboxes if desired
+          disallowedElements={[
+            "table",
+            "thead",
+            "tbody",
+            "tr",
+            "th",
+            "td",
+            "input",
+          ]}
+          components={{
+            // Intercept links to look like shadcn buttons/links and handle external navigation
+            a: ({ node, href, ...props }) => (
+              <a
+                href={href}
+                className="font-medium text-primary underline underline-offset-4 hover:text-primary/80 cursor-pointer"
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => handleLinkClick(e, href)}
+                {...props}
+              />
+            ),
+            // Intercept blockquotes to give them a primary colored border
+            blockquote: ({ node, ...props }) => (
+              <blockquote
+                className="border-l-4 border-primary pl-3 not-italic"
+                {...props}
+              />
+            ),
+            // Intercept code to look like shadcn inline code or code blocks
+            code: ({ node, className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || "");
+              const isInline = !match;
+              if (isInline) {
+                return (
+                  <code
+                    className="relative rounded bg-primary text-primary-foreground px-1.5 py-1 font-mono text-sm font-medium"
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                );
+              }
               return (
                 <code
-                  className="relative rounded bg-primary text-primary-foreground px-1.5 py-1 font-mono text-sm font-medium"
+                  className="relative rounded bg-transparent p-0 font-mono text-sm text-foreground"
                   {...props}
                 >
                   {children}
                 </code>
               );
-            }
-            return (
-              <code
-                className="relative rounded bg-transparent p-0 font-mono text-sm text-foreground"
+            },
+            // Intercept pre to provide the shadcn card-like background
+            pre: ({ node, children, ...props }) => (
+              <pre
+                className="overflow-x-auto rounded-lg border bg-card p-4 mt-4 mb-4"
                 {...props}
               >
                 {children}
-              </code>
-            );
-          },
-          // Intercept pre to provide the shadcn card-like background
-          pre: ({ node, children, ...props }) => (
-            <pre
-              className="overflow-x-auto rounded-lg border bg-card p-4 mt-4 mb-4"
-              {...props}
-            >
-              {children}
-            </pre>
-          ),
-        }}
+              </pre>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+
+      <AlertDialog
+        open={!!linkToConfirm}
+        onOpenChange={(open) => !open && setLinkToConfirm(null)}
       >
-        {content}
-      </ReactMarkdown>
-    </div>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>External Link Warning</AlertDialogTitle>
+            <AlertDialogDescription className="break-all">
+              This link will take you out of the application to an external
+              website:
+              <br />
+              <br />
+              <strong className="text-foreground">{linkToConfirm}</strong>
+              <br />
+              <br />
+              Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmLink}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

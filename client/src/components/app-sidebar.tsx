@@ -30,7 +30,10 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon" className="select-none">
-      <SidebarHeader data-tauri-drag-region className="border-b h-[48px]">
+      <SidebarHeader
+        data-tauri-drag-region
+        className="py-0 justify-center border-b h-[3rem]"
+      >
         <SidebarMenu>
           <SidebarMenuItem
             data-tauri-drag-region

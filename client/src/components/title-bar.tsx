@@ -45,13 +45,13 @@ export function TitleBar() {
   return (
     <div
       data-tauri-drag-region
-      className="flex h-[48px] w-full shrink-0 relative z-50 items-center justify-end select-none bg-sidebar border-b"
+      className="flex h-[3rem] w-full shrink-0 relative z-50 items-center justify-end select-none bg-sidebar border-b"
     >
       {/* App Title */}
       <div
         className={cn(
           "fixed top-0 pointer-events-none transition-all duration-200 ease-in-out",
-          "flex items-center h-[48px]",
+          "flex items-center h-[3rem]",
           state === "collapsed"
             ? "left-[calc(var(--sidebar-width-icon)+0.5rem)]"
             : "left-4",
@@ -68,7 +68,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={toggleAlwaysOnTop}
-            className={`inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 cursor-default ${
+            className={`inline-flex h-full w-[3rem] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-200 cursor-default ${
               isAlwaysOnTop ? "text-foreground opacity-100" : ""
             }`}
           >
@@ -96,7 +96,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={() => appWindow.minimize()}
-            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
+            className="inline-flex h-full w-[3rem] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
           >
             <Minus strokeWidth={1.5} size={16} />
           </TooltipTrigger>
@@ -111,7 +111,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={() => appWindow.toggleMaximize()}
-            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
+            className="inline-flex h-full w-[3rem] flex-shrink-0 items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-default"
           >
             {isMaximized ? (
               <Copy
@@ -136,7 +136,7 @@ export function TitleBar() {
             type="button"
             tabIndex={-1}
             onClick={() => appWindow.close()}
-            className="inline-flex h-full w-[48px] flex-shrink-0 items-center justify-center hover:bg-[#c42b1c] hover:text-white transition-colors cursor-default"
+            className="inline-flex h-full w-[3rem] flex-shrink-0 items-center justify-center hover:bg-[#c42b1c] hover:text-white transition-colors cursor-default"
           >
             <X strokeWidth={1.5} size={18} />
           </TooltipTrigger>
