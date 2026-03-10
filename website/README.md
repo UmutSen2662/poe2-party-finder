@@ -1,43 +1,35 @@
-# Astro Starter Kit: Minimal
+# Website Documentation (Astro + React)
 
-```sh
-bun create astro@latest -- --template minimal
-```
+This workspace contains both the public-facing **Marketing Website** and the authenticated **Admin Dashboard** for the Path of Exile 2 Party Finder.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+It is built using [Astro](https://astro.build/) for maximum flexibility: allowing blazing-fast static generation for the public pages, and full React SPA capabilities for the admin dashboard.
 
-## 🚀 Project Structure
+## Tech Stack Overview
+- **Core Framework:** [Astro v5](https://astro.build/)
+- **UI Components:** React 19 + ShadCN UI
+- **Styling:** Tailwind CSS v4 (Imported from the `shared` workspace package to guarantee identical styles to the desktop app)
+- **API Client:** Eden (`@elysiajs/eden`)
 
-Inside of your Astro project, you'll see the following folders and files:
+## Development Commands
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+If you just want to run the whole stack (Desktop, API, and Website), run `bun run dev` from the **monorepo root**.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+If you are working strictly inside the `website/` directory, you can use these commands:
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+| Command | Action |
+| :--- | :--- |
+| `bun run dev` | Starts local dev server at `localhost:4321` |
+| `bun run build` | Build the site to `./dist/` |
+| `bun run preview` | Preview your build locally before deploying |
+| `bunx astro add [package]` | Add Astro integrations like React or Tailwind |
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Architecture Notes
 
-## 🧞 Commands
+### Shared Tailwind Theme
+To ensure the website and desktop application look identical, the UI design tokens (colors, border radiuses, dark mode settings) do not live in this folder. 
+They are defined centrally in `../shared/src/styles/theme.css`.
+Our local `src/styles/global.css` automatically imports that shared theme file.
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### Public Pages vs Admin Pages
+- Public landing pages (e.g., `src/pages/index.astro`) should be built primarily with `.astro` files to guarantee zero JavaScript is shipped to SEO bots, falling back to React only for interactive islands.
+- Admin dashboard pages (e.g., `src/pages/admin/`) will be structured using Astro to load heavy React dashboard client applications (`client:only="react"`).
