@@ -35,11 +35,14 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
     e: React.MouseEvent<HTMLAnchorElement>,
     href?: string,
   ) => {
+    // We ALWAYS prevent default to ensure the Tauri webview never actually navigates.
+    e.preventDefault();
+
     if (!href) return;
 
     // Check if it's an external link (http/https)
+    // Only these are allowed to be opened, and they go through the external link warning mask
     if (href.startsWith("http://") || href.startsWith("https://")) {
-      e.preventDefault();
       setLinkToConfirm(href);
     }
   };
@@ -237,7 +240,7 @@ export function MarkdownGuideDialog() {
               [Link](url)
             </span>
             {/* TODO: Add a link to our website */}
-            <Markdown content="[Clickable Link]()" className="[&>p]:!m-0" />
+            <Markdown content="[Clickable Link](https://example.com)" className="[&>p]:!m-0" />
           </div>
         </div>
       </DialogContent>
