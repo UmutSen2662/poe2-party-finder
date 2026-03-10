@@ -20,6 +20,8 @@ This repository uses **Bun Workspaces** to manage both the server and client pac
 - **Root:** Manages global dependencies (`concurrently`, `@biomejs/biome`) and provides global wrapper scripts.
 - **`server/`:** Contains the Elysia backend API and database schemas.
 - **`client/`:** Contains the React frontend and Tauri desktop runtime.
+- **`website/`:** Contains the Astro marketing site and React admin dashboard.
+- **`shared/`:** Contains global shared resources, like the CSS variables and Tailwind theme (`src/styles/theme.css`), that keep the website and client UI perfectly in sync.
 
 If a command affects both parts of the app (like starting the whole project, or linting everything), run it from the **Root**. If a command is specific to frontend tooling (like adding a Shadcn component) or backend tooling (like generating database migrations), you must `cd` into the respective workspace first.
 
@@ -31,13 +33,19 @@ If a command affects both parts of the app (like starting the whole project, or 
 - **Database Driver:** PostgreSQL (`postgres` package)
 - **API Pattern:** Endpoints are defined using Elysia, exporting the App's type signature so the frontend can consume it with complete end-to-end type safety.
 
-### Client-side Stack
+### Client-side Stack (Desktop App)
 (See the detailed [Client Documentation](./client/README.md) for UI components, routing, and querying the API.)
 - **Desktop Wrapper:** [Tauri v2](https://v2.tauri.app/)
 - **Package Bundler:** [Vite v7](https://vitejs.dev/)
 - **UI & Styling:** React 19 + Tailwind CSS v4 + ShadCN UI
 - **Routing:** Custom React Tab System (Optimized for State Persistence)
 - **Data Fetching:** [TanStack Query](https://tanstack.com/query/latest)
+- **API Client:** Eden (`@elysiajs/eden`)
+
+### Website Stack (Marketing & Admin)
+(See the detailed [Website Documentation](./website/README.md) for rendering strategies and routes.)
+- **Framework:** [Astro](https://astro.build/)
+- **UI & Styling:** React 19 + Tailwind CSS v4 + ShadCN UI (Shared theme with Client)
 - **API Client:** Eden (`@elysiajs/eden`)
 
 ---
@@ -64,7 +72,7 @@ This single command installs all dependencies for the root, the `client` workspa
 ```bash
 bun run dev
 ```
-Start both the backend API and the Tauri desktop app concurrently.
+Start the backend API, the Tauri desktop app, and the Astro website concurrently.
 
 ### Database Operations from Root
 ```bash
@@ -85,7 +93,7 @@ bun run check         # Format, lint, and sort imports in all files
 ```bash
 bun run typecheck
 ```
-Runs TypeScript compiler checks (`tsc --noEmit`) concurrently on both workspaces to ensure end-to-end type-safety is maintained.
+Runs TypeScript compiler checks (`tsc` and `astro check`) concurrently on all workspaces to ensure end-to-end type-safety is maintained.
 
 ---
 

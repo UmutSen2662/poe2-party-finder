@@ -1,0 +1,78 @@
+# 📝 GFM Markdown Test Suite (shadcn style)
+
+This page tests how **GitHub Flavored Markdown** is rendered and styled using `@tailwindcss/typography` combined with our custom shadcn component mappings!
+
+---
+
+## 1. Headers
+
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+
+---
+
+## 2. Text Formatting
+
+Normal text can be *italicized* or **bolded**, and even ***both at the same time***!
+
+You can also use ~~strikethrough~~ to denote removed information.
+
+---
+
+## 3. Lists
+
+### Unordered Lists
+You can use asterisks `*` or hyphens `-` for unordered lists.
+- A healer character
+- A tank character
+  - Paladin (Sub-class)
+  - Warrior (Sub-class)
+- A DPS character
+  * Ranged
+  * Melee
+
+### Ordered Lists
+1. First step: Farm currency
+2. Second step: Buy gear
+3. Third step: Defeat bosses
+   1. Sub-boss A
+   2. Sub-boss B
+
+---
+
+## 4. Blocks and Quotes
+
+> This is a block quote.
+> Quotes are great for emphasizing rules or sharing context from another player!
+
+> Nested quotes?
+>> Yes, they are supported by GFM!
+
+---
+
+## 5. Links & Images
+
+You can create standard links easily:
+[Visit the Path of Exile Database](https://poedb.tw/us/)
+
+Autolinks (GFM feature) also work:
+https://github.com
+
+---
+
+## 6. Code & Variables
+
+Often you might need to mention a specific skill or item. Use inline code like this: `Vaal Cleave` or `Mirror of Kalandra`.
+
+If you need to share a build guide snippet or a loot filter block, use a code block:
+
+```json
+{
+  "Item Class": "Currency",
+  "BaseType": "Divine Orb",
+  "SetBorderColor": "255 0 0",
+  "SetFontSize": 45
+}
+```
