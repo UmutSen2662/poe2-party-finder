@@ -1,5 +1,5 @@
-import { toHTML } from 'discord-markdown';
-import { writeFileSync } from 'fs';
+import { writeFileSync } from "node:fs";
+import { toHTML } from "discord-markdown";
 
 const testString = `# 🛡️ DISCORD MARKDOWN V2 TEST SUITE
 
@@ -96,5 +96,5 @@ Text inside a brainfuck block is often dark green.
 \`\`\``;
 
 const result = toHTML(testString, { escapeHTML: true });
-writeFileSync('output.html', result);
+writeFileSync("output.html", result);
 console.log("Done");

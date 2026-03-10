@@ -240,7 +240,10 @@ export function MarkdownGuideDialog() {
               [Link](url)
             </span>
             {/* TODO: Add a link to our website */}
-            <Markdown content="[Clickable Link](https://example.com)" className="[&>p]:!m-0" />
+            <Markdown
+              content="[Clickable Link](https://example.com)"
+              className="[&>p]:!m-0"
+            />
           </div>
         </div>
       </DialogContent>
