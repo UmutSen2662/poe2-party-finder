@@ -47,6 +47,10 @@
       ],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }
+    },
+    {
+      "includes": ["website/**/*.astro"],
+      "linter": { "enabled": false }
     }
   ]
 }
