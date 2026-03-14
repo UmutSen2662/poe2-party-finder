@@ -1,6 +1,6 @@
 # Website Documentation (Astro + React)
 
-This workspace contains both the public-facing **Marketing Website** and the authenticated **Admin Dashboard** for the Path of Exile 2 Party Finder.
+This workspace contains both the public-facing **Landing Page** and the authenticated **Admin Dashboard** for the Path of Exile 2 Party Finder.
 
 It is built using [Astro](https://astro.build/) for maximum flexibility: allowing blazing-fast static generation for the public pages, and full React SPA capabilities for the admin dashboard.
 

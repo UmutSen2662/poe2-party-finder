@@ -18,7 +18,11 @@ export function SettingsPage() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold border-b pb-2">Appearance</h2>
 
-          <div className="flex items-center justify-between p-4 rounded-lg border bg-card text-card-foreground shadow-xs">
+          <button
+            type="button"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex items-center justify-between p-4 rounded-lg border bg-card text-card-foreground shadow-xs w-full text-left hover:bg-accent/50 transition-colors cursor-pointer"
+          >
             <div className="space-y-1">
               <h3 className="font-medium leading-none">Dark Mode</h3>
               <p className="text-sm text-muted-foreground">
@@ -31,14 +35,9 @@ export function SettingsPage() {
                 <Kbd>Shift</Kbd>
                 <Kbd>D</Kbd>
               </KbdGroup>
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={(checked) =>
-                  setTheme(checked ? "dark" : "light")
-                }
-              />
+              <Switch checked={theme === "dark"} />
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ This repository uses **Bun Workspaces** to manage both the server and client pac
 - **Root:** Manages global dependencies (`concurrently`, `@biomejs/biome`) and provides global wrapper scripts.
 - **`server/`:** Contains the Elysia backend API and database schemas.
 - **`client/`:** Contains the React frontend and Tauri desktop runtime.
-- **`website/`:** Contains the Astro marketing site and React admin dashboard.
+- **`website/`:** Contains the Astro landing page and React admin dashboard.
 - **`shared/`:** Contains global shared resources, like the CSS variables and Tailwind theme (`src/styles/theme.css`), that keep the website and client UI perfectly in sync.
 
 If a command affects both parts of the app (like starting the whole project, or linting everything), run it from the **Root**. If a command is specific to frontend tooling (like adding a Shadcn component) or backend tooling (like generating database migrations), you must `cd` into the respective workspace first.

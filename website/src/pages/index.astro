@@ -1,5 +1,6 @@
 ---
-
+import "../styles/global.css";
+import HydrationDemo from "../components/HydrationDemo";
 ---
 
 <html lang="en">
@@ -9,9 +10,164 @@
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Astro Hydration Demo</title>
 	</head>
-	<body>
-		<h1>Astro</h1>
+	<body class="p-8 min-h-screen flex flex-col items-center">
+		<header class="mb-12">
+			<h1 class="text-4xl font-bold mb-4">Astro Hydration Demo</h1>
+			<p class="text-muted-foreground text-lg max-w-2xl">
+				Astro uses an "Island Architecture" where React components render to static HTML by default.
+				Use <code class="bg-secondary px-1 rounded">client:*</code> directives to hydrate them into interactive apps.
+			</p>
+		</header>
+
+		<main class="space-y-16 max-w-4xl">
+			<!-- 1. Static - No Directive -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">1. Static (No Directive)</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Renders as pure HTML at build time. <strong>Zero JavaScript shipped.</strong>
+					The component shows its initial state but is completely non-interactive.
+					Use for: footers, headers, content that never changes.
+				</p>
+				<HydrationDemo method="static (no directive)" />
+			</section>
+
+			<!-- 2. client:only -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">2. client:only</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:only="react" /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Skips server-side rendering entirely. Component only renders in the browser.
+					Shows nothing (or a fallback) on the server, then mounts client-side.
+					Use for: components using browser-only APIs like <code class="text-xs">localStorage</code>, 
+					<code class="text-xs">geolocation</code>, or <code class="text-xs">window</code>.
+				</p>
+				<HydrationDemo client:only="react" method="client:only" />
+			</section>
+
+			<!-- 3. client:load -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">3. client:load</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:load /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Hydrates immediately when JavaScript downloads and executes.
+					Highest priority hydration. The page waits for this component's JS before it's interactive.
+					Use for: above-the-fold content, critical interactive elements needed immediately on load.
+				</p>
+				<HydrationDemo client:load method="client:load" />
+			</section>
+
+			<!-- 4. client:idle -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">4. client:idle</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:idle /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Hydrates when the browser is idle - after the initial page load is complete
+					and the main thread has finished its critical work.
+					Use for: secondary interactions, non-critical UI, deferred features.
+				</p>
+				<HydrationDemo client:idle method="client:idle" />
+			</section>
+
+			<!-- 5. client:visible -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">5. client:visible</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:visible /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Hydrates only when the component enters the viewport (user scrolls to it).
+					The JS for this component won't load until it's needed.
+					Use for: below-the-fold content, lazy-loaded interactivity, components at the bottom of the page.
+				</p>
+				<HydrationDemo client:visible method="client:visible" />
+			</section>
+
+			<!-- 6. client:visible with rootMargin -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">6. client:visible with rootMargin</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:visible={{rootMargin: "200px"}} /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Starts hydrating when the component is <strong>200px away</strong> from entering the viewport.
+					This prevents the user from seeing the "hydration" moment - it's already interactive by the time they see it.
+					Use for: reducing perceived latency on scroll, larger components.
+				</p>
+				<HydrationDemo client:visible={{rootMargin: "200px"}} method="client:visible (200px margin)" />
+			</section>
+
+			<!-- 7. client:media -->
+			<section>
+				<h2 class="text-2xl font-semibold mb-4">7. client:media</h2>
+				<div class="bg-muted/50 p-4 rounded-lg mb-4">
+					<code class="text-sm text-muted-foreground">&lt;HydrationDemo client:media="(min-width: 768px)" /&gt;</code>
+				</div>
+				<p class="text-sm text-muted-foreground mb-4">
+					Hydrates only when the specified media query matches.
+					On mobile, this stays as static HTML. On desktop (width ≥ 768px), it becomes interactive.
+					Use for: responsive-only components, desktop-only features, features that only make sense at certain sizes.
+				</p>
+				<HydrationDemo client:media="(min-width: 768px)" method="client:media (min-width: 768px)" />
+			</section>
+
+			<!-- Summary -->
+			<section class="pt-8 border-t">
+				<h2 class="text-2xl font-semibold mb-4">Quick Reference</h2>
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm">
+						<thead>
+							<tr class="border-b">
+								<th class="text-left py-2 pr-4">Directive</th>
+								<th class="text-left py-2 pr-4">When it hydrates</th>
+								<th class="text-left py-2">Best for</th>
+							</tr>
+						</thead>
+						<tbody class="text-muted-foreground">
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">(none)</td>
+								<td class="py-2 pr-4">Never</td>
+								<td class="py-2">Static content</td>
+							</tr>
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">client:only</td>
+								<td class="py-2 pr-4">Browser only</td>
+								<td class="py-2">localStorage, geolocation</td>
+							</tr>
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">client:load</td>
+								<td class="py-2 pr-4">Immediately</td>
+								<td class="py-2">Above-the-fold</td>
+							</tr>
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">client:idle</td>
+								<td class="py-2 pr-4">When idle</td>
+								<td class="py-2">Non-critical UI</td>
+							</tr>
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">client:visible</td>
+								<td class="py-2 pr-4">On scroll</td>
+								<td class="py-2">Below-the-fold</td>
+							</tr>
+							<tr class="border-b">
+								<td class="py-2 pr-4 font-mono text-xs">client:media</td>
+								<td class="py-2 pr-4">On media match</td>
+								<td class="py-2">Responsive components</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</main>
 	</body>
 </html>
