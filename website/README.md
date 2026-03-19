@@ -5,7 +5,7 @@ This workspace contains both the public-facing **Landing Page** and the authenti
 It is built using [Astro](https://astro.build/) for maximum flexibility: allowing blazing-fast static generation for the public pages, and full React SPA capabilities for the admin dashboard.
 
 ## Tech Stack Overview
-- **Core Framework:** [Astro v5](https://astro.build/)
+- **Core Framework:** [Astro v6](https://astro.build/)
 - **UI Components:** React 19 + ShadCN UI
 - **Styling:** Tailwind CSS v4 (Imported from the `shared` workspace package to guarantee identical styles to the desktop app)
 - **API Client:** Eden (`@elysiajs/eden`)
