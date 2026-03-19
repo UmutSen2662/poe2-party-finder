@@ -1,5 +1,6 @@
 ---
 import "@/styles/global.css";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import HydrationDemo from "@/components/HydrationDemo";
 ---
 
@@ -15,10 +16,16 @@ import HydrationDemo from "@/components/HydrationDemo";
 	<body class="p-8 min-h-screen flex flex-col items-center">
 		<header class="mb-12">
 			<h1 class="text-4xl font-bold mb-4">Astro Hydration Demo</h1>
-			<p class="text-muted-foreground text-lg max-w-2xl">
+			<p class="text-muted-foreground text-lg max-w-2xl mb-4">
 				Astro uses an "Island Architecture" where React components render to static HTML by default.
 				Use <code class="bg-secondary px-1 rounded">client:*</code> directives to hydrate them into interactive apps.
 			</p>
+			<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-2xl">
+				<p class="text-sm text-blue-800 dark:text-blue-200">
+					<strong>Note:</strong> This demo uses artificial delays (1.5-2 seconds) to visualize the hydration process. 
+					In real applications, hydration happens almost instantly.
+				</p>
+			</div>
 		</header>
 
 		<main class="space-y-16 max-w-4xl">
@@ -33,7 +40,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					The component shows its initial state but is completely non-interactive.
 					Use for: footers, headers, content that never changes.
 				</p>
-				<HydrationDemo method="static (no directive)" />
+				<ErrorBoundary>
+					<HydrationDemo method="static (no directive)" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 2. client:only -->
@@ -48,7 +57,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					Use for: components using browser-only APIs like <code class="text-xs">localStorage</code>, 
 					<code class="text-xs">geolocation</code>, or <code class="text-xs">window</code>.
 				</p>
-				<HydrationDemo client:only="react" method="client:only" />
+				<ErrorBoundary>
+					<HydrationDemo client:only="react" method="client:only" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 3. client:load -->
@@ -62,7 +73,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					Highest priority hydration. The page waits for this component's JS before it's interactive.
 					Use for: above-the-fold content, critical interactive elements needed immediately on load.
 				</p>
-				<HydrationDemo client:load method="client:load" />
+				<ErrorBoundary>
+					<HydrationDemo client:load method="client:load" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 4. client:idle -->
@@ -76,7 +89,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					and the main thread has finished its critical work.
 					Use for: secondary interactions, non-critical UI, deferred features.
 				</p>
-				<HydrationDemo client:idle method="client:idle" />
+				<ErrorBoundary>
+					<HydrationDemo client:idle method="client:idle" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 5. client:visible -->
@@ -90,7 +105,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					The JS for this component won't load until it's needed.
 					Use for: below-the-fold content, lazy-loaded interactivity, components at the bottom of the page.
 				</p>
-				<HydrationDemo client:visible method="client:visible" />
+				<ErrorBoundary>
+					<HydrationDemo client:visible method="client:visible" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 6. client:visible with rootMargin -->
@@ -104,7 +121,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					This prevents the user from seeing the "hydration" moment - it's already interactive by the time they see it.
 					Use for: reducing perceived latency on scroll, larger components.
 				</p>
-				<HydrationDemo client:visible={{rootMargin: "200px"}} method="client:visible (200px margin)" />
+				<ErrorBoundary>
+					<HydrationDemo client:visible={{rootMargin: "200px"}} method="client:visible (200px margin)" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- 7. client:media -->
@@ -118,7 +137,9 @@ import HydrationDemo from "@/components/HydrationDemo";
 					On mobile, this stays as static HTML. On desktop (width ≥ 768px), it becomes interactive.
 					Use for: responsive-only components, desktop-only features, features that only make sense at certain sizes.
 				</p>
-				<HydrationDemo client:media="(min-width: 768px)" method="client:media (min-width: 768px)" />
+				<ErrorBoundary>
+					<HydrationDemo client:media="(min-width: 768px)" method="client:media (min-width: 768px)" />
+				</ErrorBoundary>
 			</section>
 
 			<!-- Summary -->
