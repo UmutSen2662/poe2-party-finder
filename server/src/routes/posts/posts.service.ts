@@ -1,6 +1,6 @@
 import { desc } from "drizzle-orm";
-import { db } from "../../db";
-import { posts } from "../../db/schema";
+import { db } from "@/db";
+import { posts } from "@/db/schema";
 
 export const getAllPosts = async () => {
   return await db.query.posts.findMany({
@@ -16,5 +16,9 @@ export const createPost = async (data: { title: string; content: string }) => {
       content: data.content,
     })
     .returning();
+
+  if (!newPost) {
+    throw new Error("Failed to create post");
+  }
   return newPost;
 };

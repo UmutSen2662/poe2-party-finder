@@ -50,11 +50,11 @@ bunx drizzle-kit push      # Pushes schema changes directly to the database (bes
 *(These commands can also be run from the root directory using `bun run db:generate` and `bun run db:migrate`).*
 
 ### 4. Querying the database in your code
-Import `db` from `src/db` and use the Drizzle query API:
+Import `db` from `@/db` and use the Drizzle query API:
 
 ```typescript
-import { db } from "../../db";
-import { posts } from "../../db/schema";
+import { db } from "@/db";
+import { posts } from "@/db/schema";
 
 // Get all posts, newest first
 const allPosts = await db.query.posts.findMany({
@@ -174,3 +174,21 @@ bun build src/index.ts --compile --outfile=poe2-server
 
 You can then run `./poe2-server` (`poe2-server.exe` on Windows) on your target machine. 
 *Note: You will still need to provide the `.env` variables (like `DATABASE_URL` and `UPLOAD_DIR`) in the environment where the executable runs.*
+
+---
+
+## Import Aliases
+
+The server workspace uses a minimal `@/*` TypeScript path alias to avoid deep relative imports. Use it for imports that would otherwise require `../../` or more:
+
+```typescript
+// Use @ alias for deep paths
+import { db } from "@/db";
+import { posts } from "@/db/schema";
+import { CategorySchema } from "@/db/schema";
+
+// Keep shallow relative imports local
+import { getAllPosts } from "./posts.service";
+```
+
+This keeps imports readable while avoiding the overhead of fully aliasing every same-folder import.

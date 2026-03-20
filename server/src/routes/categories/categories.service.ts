@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
-import { db } from "../../db";
-import { categories } from "../../db/schema";
+import { db } from "@/db";
+import { categories } from "@/db/schema";
 
 export const getAllCategories = async () => {
   return await db.query.categories.findMany({
@@ -35,6 +35,10 @@ export const updateCategory = async (
     .set(data)
     .where(eq(categories.id, id))
     .returning();
+
+  if (!updatedCategory) {
+    throw new Error("Category not found");
+  }
   return updatedCategory;
 };
 
@@ -43,11 +47,20 @@ export const deleteCategory = async (id: number) => {
     .delete(categories)
     .where(eq(categories.id, id))
     .returning();
+
+  if (!deletedCategory) {
+    throw new Error("Category not found");
+  }
   return deletedCategory;
 };
 
 export const getCategoryById = async (id: number) => {
-  return await db.query.categories.findFirst({
+  const category = await db.query.categories.findFirst({
     where: eq(categories.id, id),
   });
+
+  if (!category) {
+    throw new Error("Category not found");
+  }
+  return category;
 };

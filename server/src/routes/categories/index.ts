@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { CategorySchema } from "../../db/schema";
+import { CategorySchema } from "@/db/schema";
 import {
   createCategory,
   deleteCategory,
@@ -15,7 +15,7 @@ export const categoriesRoutes = new Elysia({ prefix: "/categories" })
   .post("/", ({ body }) => createCategory(body), {
     body: t.Object({
       displayName: t.String(),
-      imagePath: t.String(),
+      imagePath: t.Optional(t.String()),
     }),
   })
   .put("/:id", ({ params, body }) => updateCategory(params.id, body), {
@@ -23,8 +23,8 @@ export const categoriesRoutes = new Elysia({ prefix: "/categories" })
       id: t.Number(),
     }),
     body: t.Object({
-      displayName: t.String(),
-      imagePath: t.String(),
+      displayName: t.Optional(t.String()),
+      imagePath: t.Optional(t.String()),
     }),
   })
   .delete("/:id", ({ params }) => deleteCategory(params.id), {
