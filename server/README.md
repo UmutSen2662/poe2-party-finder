@@ -47,22 +47,43 @@ bunx drizzle-kit push      # Pushes schema changes directly to the database (bes
 ```
 *(These commands can also be run from the root directory using `bun run db:generate` and `bun run db:migrate`).*
 
+
 ### 4. Querying the database in your code
-Import `db` from `@/db` and use the Drizzle query API:
+Import `db` from `@/db` and use the Drizzle query API with structured error handling:
 
 ```typescript
 import { db } from "@/db";
 import { posts } from "@/db/schema";
+import { DatabaseError } from "@/lib/errors";
 
 // Get all posts, newest first
-const allPosts = await db.query.posts.findMany({
-  orderBy: [desc(posts.createdAt)],
-});
+try {
+  const allPosts = await db.query.posts.findMany({
+    orderBy: [desc(posts.createdAt)],
+  });
+  return allPosts;
+} catch (error) {
+  console.error("Database error in getAllPosts:", {
+    error: error instanceof Error ? error.message : String(error),
+    operation: "getAllPosts",
+  });
+  throw new DatabaseError("Failed to fetch posts");
+}
 
 // Insert a new post
-const [newPost] = await db.insert(posts)
-  .values({ title: "My Post", content: "Hello world" })
-  .returning();
+try {
+  const [newPost] = await db.insert(posts)
+    .values({ title: "My Post", content: "Hello world" })
+    .returning();
+  return newPost;
+} catch (error) {
+  console.error("Database error in createPost:", {
+    error: error instanceof Error ? error.message : String(error),
+    operation: "createPost",
+    data: { title: "My Post", hasContent: true }
+  });
+  throw new DatabaseError("Failed to create post");
+}
 ```
 
 Everything here is fully typed — `newPost` will automatically have `id`, `title`, `content`, and `createdAt` properties with the correct types.
