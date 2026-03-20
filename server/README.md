@@ -6,8 +6,6 @@ This workspace contains the backend API and database schemas for the Path of Exi
 
 We use **Drizzle ORM** to manage our PostgreSQL database.
 
-### How the pieces fit together
-
 There are 3 key files:
 
 | File | Purpose |
@@ -174,6 +172,71 @@ bun build src/index.ts --compile --outfile=poe2-server
 
 You can then run `./poe2-server` (`poe2-server.exe` on Windows) on your target machine. 
 *Note: You will still need to provide the `.env` variables (like `DATABASE_URL` and `UPLOAD_DIR`) in the environment where the executable runs.*
+
+---
+
+## Error Handling & Logging
+
+### Error Architecture
+We use a structured error handling system with custom error classes:
+
+- **AppError**: Base class for all application errors
+- **NotFoundError**: 404 errors for missing resources
+- **ValidationError**: 400 errors for validation failures
+- **DatabaseError**: 500 errors for database operation failures
+- **InternalServerError**: 500 errors for unexpected server errors
+
+### Error Logging Pattern
+All database operations include structured error logging with context:
+
+```typescript
+} catch (error) {
+  console.error("Database error in createCategory:", {
+    error: error.message,
+    operation: "createCategory",
+    data: { displayName: data.displayName, hasImagePath: !!data.imagePath }
+  });
+  throw new DatabaseError("Failed to create category");
+}
+```
+
+This provides:
+- **Detailed error information** for debugging
+- **Operation context** to identify where errors occur
+- **Sanitized data** (sensitive info is excluded)
+- **User-friendly error responses** (generic messages for frontend)
+
+### Input Validation
+Elysia handles input validation automatically through schema definitions in routes. Invalid requests trigger `VALIDATION` errors before reaching service layer.
+
+---
+
+## Database Transactions
+
+### Current Implementation
+Current database operations are single-query atomic operations that don't require transactions.
+
+### When to Use Transactions
+Use database transactions for multi-step operations that must succeed or fail together:
+
+```typescript
+// Example: Move item between categories (requires transaction)
+return await db.transaction(async (tx) => {
+  await tx.update(posts).set({ categoryId: toCatId }).where(eq(posts.id, postId));
+  await tx.update(categories).set({ postCount: sql`${categories.postCount} - 1` }).where(eq(categories.id, fromCatId));
+  await tx.update(categories).set({ postCount: sql`${categories.postCount} + 1` }).where(eq(categories.id, toCatId));
+});
+```
+
+**Use transactions when:**
+- Multiple related database operations must be atomic
+- Data consistency depends on all operations succeeding
+- Operations involve complex business logic with multiple steps
+
+**Skip transactions for:**
+- Single database operations (already atomic)
+- Simple CRUD operations
+- Read-only operations
 
 ---
 

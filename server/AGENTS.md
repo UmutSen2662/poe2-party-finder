@@ -1,24 +1,44 @@
-# AGENTS.md
+# Server AGENTS.md
 
-## Stack
-- Bun runtime
-- Elysia.js
-- Drizzle ORM
-- PostgreSQL
+**AI Context**: Bun + Elysia + Drizzle + PostgreSQL
 
-## Rules
-- Keep route definitions under `src/routes/<feature>/`.
-- Keep business logic in feature service files.
-- Always export `type App = typeof app` from `src/index.ts`.
-- Always validate endpoint inputs with Elysia `t` schemas.
-- Treat `src/db/schema.ts` as the single source of truth for database structure.
-- Do not hand-edit generated files in `drizzle/`.
-- Keep uploads under `uploads/`.
+## Architecture
+- `src/routes/<feature>/index.ts` - Route definitions
+- `src/routes/<feature>/*.service.ts` - Business logic  
+- `src/db/schema.ts` - Database schema (source of truth)
+- `src/index.ts` - Must export `type App = typeof app`
 
-## Schema Workflow
-- After schema changes, run `bun run db:generate`.
-- After schema changes, run `bun run db:migrate`.
+## Required Patterns
+- Validate inputs with Elysia `t` schemas
+- Use structured error logging in all database operations
+- Use custom error classes from `src/lib/errors.ts`
+- Keep uploads under `uploads/`
+
+## Error Handling Pattern
+```typescript
+} catch (error) {
+  console.error("Database error in operationName:", {
+    error: error instanceof Error ? error.message : String(error),
+    operation: "operationName",
+    context: { relevantData }
+  });
+  throw new DatabaseError("User-friendly message");
+}
+```
 
 ## Environment
-- `server/.env` must provide `DATABASE_URL`.
-- `server/.env` must provide `UPLOAD_DIR`.
+```env
+DATABASE_URL=postgres://user:password@localhost:5432/poe2_party_finder
+UPLOAD_DIR=./uploads
+```
+
+## Commands
+- `bun run db:generate` - Create migrations
+- `bun run db:migrate` - Apply to database
+- `bun run db:seed` - Reset with mock data
+- `bunx drizzle-kit studio` - Database GUI
+- `bun build src/index.ts --compile --outfile=poe2-server` - Build binary
+
+## Import Aliases
+- Use `@/*` for deep imports (avoid `../../`)
+- Keep shallow imports relative

@@ -1,11 +1,13 @@
-# AGENTS.md
+# Shared AGENTS.md
 
-## Purpose
-- Shared design tokens and CSS theme for `client` and `website`
+**AI Context**: Shared design tokens for client + website
 
-## Rules
-- Treat `src/styles/theme.css` as the single source of truth for shared design tokens.
-- Assume changes here affect both the desktop app and the website.
-- Keep this package CSS-first.
-- Do not add app-specific UI rules here.
-- Do not move shared theme tokens into `client/` or `website/`.
+## Architecture
+- `src/styles/theme.css` - Single source of truth for design tokens
+- CSS-first package (no app-specific UI rules)
+- Affects both desktop app and website
+
+## Required Patterns
+- Treat `theme.css` as the single source of truth
+- Assume changes affect both workspaces
+- Do not move shared tokens into `client/` or `website/`

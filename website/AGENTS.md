@@ -1,18 +1,17 @@
-# AGENTS.md
+# Website AGENTS.md
 
-## Stack
-- Astro 6
-- React 19
-- Tailwind CSS v4
+**AI Context**: Astro 6 + React 19 + Tailwind v4
 
-## Rules
-- Build public pages with `.astro` files first.
-- Keep public pages as close to zero-JS as possible.
-- Use React islands only for interactive UI.
-- Load admin React apps with `client:only="react"` when full SPA behavior is needed.
-- Keep theme tokens in `shared/src/styles/theme.css`.
-- Do not define shared global design tokens in this workspace.
-- Use the `@/` path alias for `./src/` imports.
+## Architecture
+- Build public pages with `.astro` files (zero-JS preferred)
+- Use React islands only for interactive UI
+- Load admin React apps with `client:only="react"` for SPA behavior
+- Theme tokens in `shared/src/styles/theme.css`
 
-## Runtime
-- Dev server port: `4321`
+## Required Patterns
+- Keep public pages as close to zero-JS as possible
+- Use `@/` path alias for `./src/` imports
+- No shared global design tokens in this workspace
+
+## Commands
+- Dev server: `4321`
