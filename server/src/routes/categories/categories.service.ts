@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { DatabaseError, NotFoundError } from "@/lib/errors";
@@ -6,6 +6,7 @@ import { DatabaseError, NotFoundError } from "@/lib/errors";
 export const getAllCategories = async () => {
   try {
     return await db.query.categories.findMany({
+      where: eq(categories.status, "active"),
       orderBy: [desc(categories.id)],
     });
   } catch (error) {
@@ -77,7 +78,8 @@ export const updateCategory = async (
 export const deleteCategory = async (id: number) => {
   try {
     const [deletedCategory] = await db
-      .delete(categories)
+      .update(categories)
+      .set({ status: "deleted" })
       .where(eq(categories.id, id))
       .returning();
 
@@ -101,7 +103,7 @@ export const deleteCategory = async (id: number) => {
 export const getCategoryById = async (id: number) => {
   try {
     const category = await db.query.categories.findFirst({
-      where: eq(categories.id, id),
+      where: and(eq(categories.id, id), eq(categories.status, "active")),
     });
 
     if (!category) {

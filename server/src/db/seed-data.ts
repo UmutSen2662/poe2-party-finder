@@ -41,7 +41,7 @@ export const posts = {
         "Castaway map host, 200% gold found tablets, 2-2.5m gold per player expected",
     },
     {
-      title: 5,
+      title: "5",
       content: "221312",
     },
   ],
