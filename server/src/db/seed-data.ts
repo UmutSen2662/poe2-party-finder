@@ -14,7 +14,7 @@ export const categories = {
     { displayName: "Leveling" },
     { displayName: "Xesth" },
     { displayName: "King of the Mists" },
-    { displayName: "Ulroth" },
+    { displayName: "Olroth" },
     { displayName: "Gold" },
   ],
 };
