@@ -1,14 +1,14 @@
-import { and, desc, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { categories } from "@/db/schema";
+import { sql } from "@/db/sql";
+import { sqlFile } from "@/db/sql-files";
+import type { Category } from "@/db/types";
 import { DatabaseError, NotFoundError } from "@/lib/errors";
 
-export const getAllCategories = async () => {
+export type CategoryStatus = "Active" | "Inactive";
+export type CategoryRow = Omit<Category, "status"> & { status: CategoryStatus };
+
+export const getAllCategories = async (): Promise<CategoryRow[]> => {
   try {
-    return await db.query.categories.findMany({
-      where: eq(categories.status, "active"),
-      orderBy: [desc(categories.id)],
-    });
+    return await sql.file<CategoryRow[]>(sqlFile("categories", "get-all.sql"));
   } catch (error) {
     console.error("Database error in getAllCategories:", {
       error: error instanceof Error ? error.message : String(error),
@@ -19,24 +19,22 @@ export const getAllCategories = async () => {
 };
 
 export const createCategory = async (data: {
-  displayName: string;
-  imagePath?: string;
-}) => {
+  name: string;
+  image?: string;
+  status?: CategoryStatus;
+}): Promise<CategoryRow> => {
   try {
-    const [newCategory] = await db
-      .insert(categories)
-      .values({
-        displayName: data.displayName,
-        imagePath: data.imagePath,
-      })
-      .returning();
+    const [newCategory] = await sql.file<CategoryRow[]>(
+      sqlFile("categories", "create.sql"),
+      [data.name, data.image ?? null, data.status ?? "Active"],
+    );
 
     return newCategory;
   } catch (error) {
     console.error("Database error in createCategory:", {
       error: error instanceof Error ? error.message : String(error),
       operation: "createCategory",
-      data: { displayName: data.displayName, hasImagePath: !!data.imagePath },
+      data: { name: data.name, hasImage: !!data.image },
     });
     throw new DatabaseError("Failed to create category");
   }
@@ -45,17 +43,16 @@ export const createCategory = async (data: {
 export const updateCategory = async (
   id: number,
   data: {
-    displayName?: string;
-    imagePath?: string;
-    status?: "active" | "deleted";
+    name?: string;
+    image?: string;
+    status?: CategoryStatus;
   },
-) => {
+): Promise<CategoryRow> => {
   try {
-    const [updatedCategory] = await db
-      .update(categories)
-      .set(data)
-      .where(eq(categories.id, id))
-      .returning();
+    const [updatedCategory] = await sql.file<CategoryRow[]>(
+      sqlFile("categories", "update.sql"),
+      [id, data.name ?? null, data.image ?? null, data.status ?? null],
+    );
 
     if (!updatedCategory) {
       throw new NotFoundError("Category not found");
@@ -75,13 +72,12 @@ export const updateCategory = async (
   }
 };
 
-export const deleteCategory = async (id: number) => {
+export const deleteCategory = async (id: number): Promise<CategoryRow> => {
   try {
-    const [deletedCategory] = await db
-      .update(categories)
-      .set({ status: "deleted" })
-      .where(eq(categories.id, id))
-      .returning();
+    const [deletedCategory] = await sql.file<CategoryRow[]>(
+      sqlFile("categories", "deactivate.sql"),
+      [id],
+    );
 
     if (!deletedCategory) {
       throw new NotFoundError("Category not found");
@@ -100,11 +96,12 @@ export const deleteCategory = async (id: number) => {
   }
 };
 
-export const getCategoryById = async (id: number) => {
+export const getCategoryById = async (id: number): Promise<CategoryRow> => {
   try {
-    const category = await db.query.categories.findFirst({
-      where: and(eq(categories.id, id), eq(categories.status, "active")),
-    });
+    const [category] = await sql.file<CategoryRow[]>(
+      sqlFile("categories", "get-by-id.sql"),
+      [id],
+    );
 
     if (!category) {
       throw new NotFoundError("Category not found");

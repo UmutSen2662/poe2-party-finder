@@ -1,7 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { Elysia, t } from "elysia";
-import { CategorySchema } from "@/db/schema";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 import {
   createCategory,
@@ -11,35 +10,47 @@ import {
   updateCategory,
 } from "./categories.service";
 
+const CategorySchema = t.Object({
+  id: t.Number(),
+  name: t.String(),
+  image: t.Nullable(t.String()),
+  status: t.Union([t.Literal("Active"), t.Literal("Inactive")]),
+});
+
 export const categoriesRoutes = new Elysia({ prefix: "/categories" })
   .get("/", () => getAllCategories(), {
     response: t.Array(CategorySchema),
   })
   .post("/", ({ body }) => createCategory(body), {
     body: t.Object({
-      displayName: t.String(),
-      imagePath: t.Optional(t.String()),
+      name: t.String(),
+      image: t.Optional(t.String()),
+      status: t.Optional(t.Union([t.Literal("Active"), t.Literal("Inactive")])),
     }),
+    response: CategorySchema,
   })
   .put("/:id", ({ params, body }) => updateCategory(params.id, body), {
     params: t.Object({
       id: t.Number(),
     }),
     body: t.Object({
-      displayName: t.Optional(t.String()),
-      imagePath: t.Optional(t.String()),
-      status: t.Optional(t.Union([t.Literal("active"), t.Literal("deleted")])),
+      name: t.Optional(t.String()),
+      image: t.Optional(t.String()),
+      status: t.Optional(t.Union([t.Literal("Active"), t.Literal("Inactive")])),
     }),
+    response: CategorySchema,
   })
   .delete("/:id", ({ params }) => deleteCategory(params.id), {
     params: t.Object({
       id: t.Number(),
     }),
+    response: CategorySchema,
   })
   .get("/:id", ({ params }) => getCategoryById(params.id), {
     params: t.Object({
       id: t.Number(),
     }),
+    response: CategorySchema,
   })
   .post(
     "/upload-image",
@@ -56,7 +67,7 @@ export const categoriesRoutes = new Elysia({ prefix: "/categories" })
       await mkdir(imagesDir, { recursive: true });
       await Bun.write(path, file);
 
-      return { imagePath: `/categories/images/${filename}` };
+      return { image: `/categories/images/${filename}` };
     },
     {
       body: t.Object({
@@ -64,6 +75,9 @@ export const categoriesRoutes = new Elysia({ prefix: "/categories" })
           type: "image", // only accept image/* mime types
           maxSize: "5m", // max 5MB
         }),
+      }),
+      response: t.Object({
+        image: t.String(),
       }),
     },
   )
