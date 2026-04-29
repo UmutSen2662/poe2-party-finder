@@ -80,7 +80,7 @@ CREATE TABLE Party (
     league_id INT NOT NULL,
     category_id INT NOT NULL,
     currency_id INT NOT NULL,
-    FOREIGN KEY (host_id) REFERENCES Account(id) ON DELETE SET NULL,
+    FOREIGN KEY (host_id) REFERENCES Player(id) ON DELETE SET NULL,
     FOREIGN KEY (league_id) REFERENCES League(id) ON DELETE RESTRICT,
     FOREIGN KEY (category_id) REFERENCES Category(id) ON DELETE RESTRICT,
     FOREIGN KEY (currency_id) REFERENCES Currency(id) ON DELETE RESTRICT

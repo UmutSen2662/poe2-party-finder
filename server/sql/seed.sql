@@ -34,16 +34,16 @@ INSERT INTO Badge_Category (badge_id, category_id) VALUES
 (1, 5), -- King Slayer is linked to King of the Mists
 (2, 3); -- Master Mentor is linked to Leveling
 
--- 3. USER ACCOUNTS
+-- 3. PLAYERS
 
-INSERT INTO Account (ign, oauth2, templates, host_rating, customer_rating, host_thumbs_up, host_thumbs_down, customer_thumbs_up, customer_thumbs_down) VALUES 
+INSERT INTO player (ign, oauth2, templates, host_rating, customer_rating, host_thumbs_up, host_thumbs_down, customer_thumbs_up, customer_thumbs_down) VALUES 
 ('Emre_Slayer', 'oauth_token_111', '[{"name": "Fast Olroth", "text": "WTS Olroth Kill, fast and safe."}]'::jsonb, 98.5, 100.0, 150, 2, 45, 0),
 ('Umut_Runner', 'oauth_token_222', '[{"name": "Gold Farm", "text": "Hosting Gold runs, AFK spot."}]'::jsonb, 92.0, 88.5, 85, 8, 20, 3),
 ('NoobBuyer99', 'oauth_token_333', '[]'::jsonb, 0.0, 100.0, 0, 0, 15, 0),
 ('ToxicPlayer', 'oauth_token_444', '[]'::jsonb, 45.0, 30.0, 10, 12, 5, 10);
 
--- Award badges to users
-INSERT INTO Earns (account_id, badge_id, pinned) VALUES 
+-- Award badges to players
+INSERT INTO Earns (player_id, badge_id, pinned) VALUES 
 (1, 1, TRUE),  -- Emre pins the King Slayer badge
 (2, 2, FALSE); -- Umut has Master Mentor, but not pinned
 
@@ -56,7 +56,7 @@ INSERT INTO Party (title, description, capacity, status, cost, host_id, league_i
 ('King of the Mists Carry', 'Quick kill.', 5, 'Ended', 1, 1, 1, 5, 2); -- Party 3: Completed lobby to test ratings (Hosted by Emre), King of the Mists (Cat 5)
 
 -- Customers Apply to Lobbies
-INSERT INTO Applies (account_id, party_id, status) VALUES 
+INSERT INTO Applies (player_id, party_id, status) VALUES 
 -- Applications to Party 1 (Gathering)
 (2, 1, 'Pending'),
 (3, 1, 'Accepted'),
