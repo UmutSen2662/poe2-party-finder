@@ -17,6 +17,10 @@ const categoriesQuery = queryOptions({
 
 export function SearchPage() {
   const { data: categories } = useSuspenseQuery(categoriesQuery);
+  const filterCategories = categories.map((category) => ({
+    id: category.id,
+    displayName: category.name,
+  }));
 
   const [filterState, setFilterState] = useState<SearchFilterState>({
     searchQuery: "",
@@ -42,7 +46,7 @@ export function SearchPage() {
       <SearchFilters
         state={filterState}
         onChange={handleSearchChange}
-        categories={categories}
+        categories={filterCategories}
       />
     </div>
   );

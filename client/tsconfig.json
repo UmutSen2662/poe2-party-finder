@@ -23,6 +23,10 @@
     /* Shadcn */
     "baseUrl": ".",
     "paths": {
+      "@/db/sql": ["../server/src/db/sql.ts"],
+      "@/db/sql-files": ["../server/src/db/sql-files.ts"],
+      "@/db/types": ["../server/src/db/types.ts"],
+      "@/lib/errors": ["../server/src/lib/errors.ts"],
       "@/*": ["./src/*"]
     }
   },

@@ -28,7 +28,7 @@ INSERT INTO Admin (email, password, permissions) VALUES
 
 INSERT INTO Badge (name, icon, description, condition) VALUES 
 ('King Slayer', 'slayer_badge.png', 'Successfully host 50 King of the Mists carries.', '{"target": 50, "metric": "successful_runs"}'),
-('Master Mentor', 'guide_badge.png', 'Maintain a 95% positive rating over 100 Leveling runs.', '{"target": 95, "metric": "rating_percentage"}');
+('Master Mentor', 'guide_badge.png', 'Maintain a 9.50 positive rating over 100 Leveling runs.', '{"target": 9.50, "metric": "rating_score"}');
 
 INSERT INTO Badge_Category (badge_id, category_id) VALUES 
 (1, 5), -- King Slayer is linked to King of the Mists
@@ -37,10 +37,10 @@ INSERT INTO Badge_Category (badge_id, category_id) VALUES
 -- 3. PLAYERS
 
 INSERT INTO player (ign, oauth2, templates, host_rating, customer_rating, host_thumbs_up, host_thumbs_down, customer_thumbs_up, customer_thumbs_down) VALUES 
-('Emre_Slayer', 'oauth_token_111', '[{"name": "Fast Olroth", "text": "WTS Olroth Kill, fast and safe."}]'::jsonb, 98.5, 100.0, 150, 2, 45, 0),
-('Umut_Runner', 'oauth_token_222', '[{"name": "Gold Farm", "text": "Hosting Gold runs, AFK spot."}]'::jsonb, 92.0, 88.5, 85, 8, 20, 3),
-('NoobBuyer99', 'oauth_token_333', '[]'::jsonb, 0.0, 100.0, 0, 0, 15, 0),
-('ToxicPlayer', 'oauth_token_444', '[]'::jsonb, 45.0, 30.0, 10, 12, 5, 10);
+('Emre', 'oauth_token_111', '[{"name": "Fast Olroth", "text": "WTS Olroth Kill, fast and safe."}]'::jsonb, 9.85, 10.00, 150, 2, 45, 0),
+('Umut', 'oauth_token_222', '[{"name": "Gold Farm", "text": "Hosting Gold runs, AFK spot."}]'::jsonb, 9.20, 8.85, 85, 8, 20, 3),
+('NoobPlayer', 'oauth_token_333', '[]'::jsonb, 0.00, 10.00, 0, 0, 15, 0),
+('ToxicPlayer', 'oauth_token_444', '[]'::jsonb, 4.50, 3.00, 10, 12, 5, 10);
 
 -- Award badges to players
 INSERT INTO Earns (player_id, badge_id, pinned) VALUES 
@@ -51,9 +51,9 @@ INSERT INTO Earns (player_id, badge_id, pinned) VALUES
 
 -- Create Lobbies (Parties)
 INSERT INTO Party (title, description, capacity, status, cost, host_id, league_id, category_id, currency_id) VALUES 
-('Olroth Kill - EU Server', 'Bring your own entry, stay dead if you die.', 5, 'Gathering', 2, 1, 3, 6, 2), -- Party 1: Active gathering lobby (Hosted by Emre), 2 Divine Orbs, Fate of the Vaal, Olroth Carry (Cat 6)
-('Gold Farm - 5 runs', 'Resetting fast, stay AFK.', 5, 'Started', 50, 2, 1, 7, 1), -- Party 2: Active started lobby (Hosted by Umut, queue is locked), 50 Chaos Orbs, Standard, Gold Run (Cat 7)
-('King of the Mists Carry', 'Quick kill.', 5, 'Ended', 1, 1, 1, 5, 2); -- Party 3: Completed lobby to test ratings (Hosted by Emre), King of the Mists (Cat 5)
+('Olroth Kill - EU Server', 'Bring your own entry, stay dead if you die.', 5, 'Gathering', 2, 1, 3, 6, 2), -- Party 1: Active gathering lobby (Hosted by Emre), 2 Divine Orbs, Fate of the Vaal, Olroth Carry
+('Gold Farm - 5 runs', 'Resetting fast, stay AFK.', 5, 'Started', 50, 2, 1, 7, 1), -- Party 2: Active started lobby (Hosted by Umut, queue is locked), 50 Chaos Orbs, Standard, Gold Run
+('King of the Mists Carry', 'Quick kill.', 5, 'Ended', 1, 1, 1, 5, 2); -- Party 3: Completed lobby to test ratings (Hosted by Emre), King of the Mists
 
 -- Customers Apply to Lobbies
 INSERT INTO Applies (player_id, party_id, status) VALUES 
@@ -63,7 +63,7 @@ INSERT INTO Applies (player_id, party_id, status) VALUES
 
 -- Applications to Party 2 (Started)
 (3, 2, 'Accepted'),
-(4, 2, 'Kicked'), -- ToxicPlayer got kicked mid-run
+(4, 2, 'Rejected'), -- ToxicPlayer got rejected
 
 -- Applications to Party 3 (Ended)
 (3, 3, 'Accepted'),
@@ -71,7 +71,7 @@ INSERT INTO Applies (player_id, party_id, status) VALUES
 
 -- Post-Run Ratings (For Party 3, which has 'Ended')
 INSERT INTO Rating (value, giver_id, receiver_id, party_id) VALUES 
-(1, 3, 1, 3),  -- NoobBuyer99 gives Emre a Thumbs Up (Host Rating)
-(1, 1, 3, 3),  -- Emre gives NoobBuyer99 a Thumbs Up (Customer Rating)
+(1, 3, 1, 3),  -- NoobPlayer gives Emre a Thumbs Up (Host Rating)
+(1, 1, 3, 3),  -- Emre gives NoobPlayer a Thumbs Up (Customer Rating)
 (-1, 4, 1, 3), -- ToxicPlayer gives Emre a Thumbs Down (Host Rating)
 (-1, 1, 4, 3); -- Emre gives ToxicPlayer a Thumbs Down (Customer Rating)

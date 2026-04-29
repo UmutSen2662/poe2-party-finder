@@ -35,9 +35,12 @@
   },
   "private": true,
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "2.4.4",
     "@types/bun": "latest",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "typescript": "~5.8.3",
+    "website": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"
