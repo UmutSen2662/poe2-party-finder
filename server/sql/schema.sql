@@ -1,6 +1,6 @@
 -- 1. INDEPENDENT TABLES (Reference & Core Data)
 
-CREATE TABLE Account (
+CREATE TABLE Player (
     id SERIAL PRIMARY KEY,
     ign VARCHAR(255) NOT NULL,
     oauth2 TEXT NOT NULL,
@@ -58,11 +58,11 @@ CREATE TABLE Badge_Category (
 );
 
 CREATE TABLE Earns (
-    account_id INT NOT NULL,
+    player_id INT NOT NULL,
     badge_id INT NOT NULL,
     pinned BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (account_id, badge_id),
-    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
+    PRIMARY KEY (player_id, badge_id),
+    FOREIGN KEY (player_id) REFERENCES Player(id) ON DELETE CASCADE,
     FOREIGN KEY (badge_id) REFERENCES Badge(id) ON DELETE CASCADE
 );
 
@@ -93,17 +93,17 @@ CREATE TABLE Rating (
     giver_id INT,
     receiver_id INT,
     party_id INT, 
-    FOREIGN KEY (giver_id) REFERENCES Account(id) ON DELETE SET NULL,
-    FOREIGN KEY (receiver_id) REFERENCES Account(id) ON DELETE SET NULL,
+    FOREIGN KEY (giver_id) REFERENCES Player(id) ON DELETE SET NULL,
+    FOREIGN KEY (receiver_id) REFERENCES Player(id) ON DELETE SET NULL,
     FOREIGN KEY (party_id) REFERENCES Party(id) ON DELETE SET NULL 
 );
 
 CREATE TABLE Applies (
-    account_id INT NOT NULL,
+    player_id INT NOT NULL,
     party_id INT NOT NULL,
     status VARCHAR(50) NOT NULL CHECK (status IN ('Pending', 'Accepted', 'Rejected', 'Kicked')),
     applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (account_id, party_id),
-    FOREIGN KEY (account_id) REFERENCES Account(id) ON DELETE CASCADE,
+    PRIMARY KEY (player_id, party_id),
+    FOREIGN KEY (player_id) REFERENCES Player(id) ON DELETE CASCADE,
     FOREIGN KEY (party_id) REFERENCES Party(id) ON DELETE CASCADE
 );
