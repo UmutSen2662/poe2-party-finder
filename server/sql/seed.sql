@@ -1,5 +1,3 @@
--- 1. REFERENCE DATA (Leagues, Categories, Currencies)
-
 INSERT INTO League (name, status) VALUES 
 ('Standard', 'Active'),
 ('Hardcore', 'Active'),
@@ -20,8 +18,6 @@ INSERT INTO Currency (name, icon) VALUES
 ('Divine Orb', 'divine.png'),
 ('Exalted Orb', 'exalt.png');
 
--- 2. SYSTEM DATA (Admins & Badges)
-
 INSERT INTO Admin (email, password, permissions) VALUES 
 ('admin@poe2party.com', 'hashed_secure_password_123', 'Superadmin'),
 ('mod@poe2party.com', 'hashed_secure_password_456', 'Moderator');
@@ -34,28 +30,21 @@ INSERT INTO Badge_Category (badge_id, category_id) VALUES
 (1, 5), -- King Slayer is linked to King of the Mists
 (2, 3); -- Master Mentor is linked to Leveling
 
--- 3. PLAYERS
-
 INSERT INTO player (ign, oauth2, templates, host_rating, customer_rating, host_thumbs_up, host_thumbs_down, customer_thumbs_up, customer_thumbs_down) VALUES 
 ('Emre', 'oauth_token_111', '[{"name": "Fast Olroth", "text": "WTS Olroth Kill, fast and safe."}]'::jsonb, 9.85, 10.00, 150, 2, 45, 0),
 ('Umut', 'oauth_token_222', '[{"name": "Gold Farm", "text": "Hosting Gold runs, AFK spot."}]'::jsonb, 9.20, 8.85, 85, 8, 20, 3),
 ('NoobPlayer', 'oauth_token_333', '[]'::jsonb, 0.00, 10.00, 0, 0, 15, 0),
 ('ToxicPlayer', 'oauth_token_444', '[]'::jsonb, 4.50, 3.00, 10, 12, 5, 10);
 
--- Award badges to players
 INSERT INTO Earns (player_id, badge_id, pinned) VALUES 
 (1, 1, TRUE),  -- Emre pins the King Slayer badge
 (2, 2, FALSE); -- Umut has Master Mentor, but not pinned
 
--- 4. CORE TRANSACTIONS (Parties, Applies, Ratings)
-
--- Create Lobbies (Parties)
 INSERT INTO Party (title, description, capacity, status, cost, host_id, league_id, category_id, currency_id) VALUES 
 ('Olroth Kill - EU Server', 'Bring your own entry, stay dead if you die.', 5, 'Gathering', 2, 1, 3, 6, 2), -- Party 1: Active gathering lobby (Hosted by Emre), 2 Divine Orbs, Fate of the Vaal, Olroth Carry
 ('Gold Farm - 5 runs', 'Resetting fast, stay AFK.', 5, 'Started', 50, 2, 1, 7, 1), -- Party 2: Active started lobby (Hosted by Umut, queue is locked), 50 Chaos Orbs, Standard, Gold Run
 ('King of the Mists Carry', 'Quick kill.', 5, 'Ended', 1, 1, 1, 5, 2); -- Party 3: Completed lobby to test ratings (Hosted by Emre), King of the Mists
 
--- Customers Apply to Lobbies
 INSERT INTO Applies (player_id, party_id, status) VALUES 
 -- Applications to Party 1 (Gathering)
 (2, 1, 'Pending'),

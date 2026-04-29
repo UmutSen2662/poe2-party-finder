@@ -39,10 +39,15 @@
     "@biomejs/biome": "2.4.4",
     "@types/bun": "latest",
     "concurrently": "^9.2.1",
+    "file-type": "^21.3.1",
     "typescript": "~5.8.3",
     "website": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "overrides": {
+    "yaml": ">=2.8.3",
+    "esbuild": ">=0.24.2"
   }
 }
