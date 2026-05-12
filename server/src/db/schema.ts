@@ -10,7 +10,7 @@ import { createSelectSchema } from "drizzle-typebox";
 
 export const categoryStatusEnum = pgEnum("category_status", [
   "active",
-  "deleted",
+  "inactive",
 ]);
 
 export const posts = pgTable("posts", {

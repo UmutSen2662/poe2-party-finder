@@ -15,6 +15,13 @@
       "when": 1774014995361,
       "tag": "0001_brave_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778583087743,
+      "tag": "0002_messy_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }
