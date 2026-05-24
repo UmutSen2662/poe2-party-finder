@@ -192,8 +192,8 @@ export function SearchFilters({
                   </div>
                   <Slider
                     id="host-rating"
-                    max={5}
-                    step={0.5}
+                    max={10}
+                    step={1}
                     value={[state.hostRating]}
                     showNotches
                     onValueChange={(val) =>
@@ -206,7 +206,7 @@ export function SearchFilters({
                   />
                   <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
                     <span>0 (New)</span>
-                    <span>5 (Trusted)</span>
+                    <span>10 (Trusted)</span>
                   </div>
                 </Field>
 

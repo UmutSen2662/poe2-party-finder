@@ -1,5 +1,6 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { PartyCard } from "@/components/party-card";
 import {
   type SearchFilterState,
   SearchFilters,
@@ -24,7 +25,7 @@ export function SearchPage() {
 
   const [filterState, setFilterState] = useState<SearchFilterState>({
     searchQuery: "",
-    hostRating: 4,
+    hostRating: 8,
     includeUnrated: true,
     liveSearchEnabled: false,
     category: "all",
@@ -48,6 +49,24 @@ export function SearchPage() {
         onChange={handleSearchChange}
         categories={filterCategories}
       />
+      <div className="flex flex-col gap-4">
+        <PartyCard
+          ign="ExilePro"
+          rating={9.5}
+          category="Vaal Temple"
+          categoryColor="bg-orange-500/20 text-orange-300"
+          description="Running Vaal Temple service. Fast clears, all loot reserved. TFT rules apply. No ninja looting. Voice chat required for coordination. Bring your own resistance flasks."
+          fee={30}
+          currency="divine"
+          currentQueue={3}
+          maxQueue={5}
+          isFresh={true}
+          isStale={false}
+          isDisabled={false}
+          onRefresh={() => console.log("Refresh clicked")}
+          onApply={() => console.log("Apply clicked")}
+        />
+      </div>
     </div>
   );
 }

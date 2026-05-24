@@ -38,9 +38,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "admin_email_key": {
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false,
           "name": "admin_email_key"
         }
@@ -292,12 +290,8 @@
           "tableFrom": "party",
           "tableTo": "account",
           "schemaTo": "public",
-          "columnsFrom": [
-            "host_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["host_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -306,12 +300,8 @@
           "tableFrom": "party",
           "tableTo": "league",
           "schemaTo": "public",
-          "columnsFrom": [
-            "league_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["league_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -320,12 +310,8 @@
           "tableFrom": "party",
           "tableTo": "category",
           "schemaTo": "public",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -334,12 +320,8 @@
           "tableFrom": "party",
           "tableTo": "currency",
           "schemaTo": "public",
-          "columnsFrom": [
-            "currency_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["currency_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -471,12 +453,8 @@
           "tableFrom": "rating",
           "tableTo": "account",
           "schemaTo": "public",
-          "columnsFrom": [
-            "giver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["giver_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -485,12 +463,8 @@
           "tableFrom": "rating",
           "tableTo": "account",
           "schemaTo": "public",
-          "columnsFrom": [
-            "receiver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["receiver_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -499,12 +473,8 @@
           "tableFrom": "rating",
           "tableTo": "party",
           "schemaTo": "public",
-          "columnsFrom": [
-            "party_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["party_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -544,12 +514,8 @@
           "tableFrom": "badge_category",
           "tableTo": "badge",
           "schemaTo": "public",
-          "columnsFrom": [
-            "badge_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["badge_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -558,12 +524,8 @@
           "tableFrom": "badge_category",
           "tableTo": "category",
           "schemaTo": "public",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -571,10 +533,7 @@
       "compositePrimaryKeys": {
         "badge_category_pkey": {
           "name": "badge_category_pkey",
-          "columns": [
-            "category_id",
-            "badge_id"
-          ]
+          "columns": ["category_id", "badge_id"]
         }
       },
       "uniqueConstraints": {},
@@ -613,12 +572,8 @@
           "tableFrom": "earns",
           "tableTo": "account",
           "schemaTo": "public",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -627,12 +582,8 @@
           "tableFrom": "earns",
           "tableTo": "badge",
           "schemaTo": "public",
-          "columnsFrom": [
-            "badge_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["badge_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -640,10 +591,7 @@
       "compositePrimaryKeys": {
         "earns_pkey": {
           "name": "earns_pkey",
-          "columns": [
-            "badge_id",
-            "account_id"
-          ]
+          "columns": ["badge_id", "account_id"]
         }
       },
       "uniqueConstraints": {},
@@ -688,12 +636,8 @@
           "tableFrom": "applies",
           "tableTo": "account",
           "schemaTo": "public",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -702,12 +646,8 @@
           "tableFrom": "applies",
           "tableTo": "party",
           "schemaTo": "public",
-          "columnsFrom": [
-            "party_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["party_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -715,10 +655,7 @@
       "compositePrimaryKeys": {
         "applies_pkey": {
           "name": "applies_pkey",
-          "columns": [
-            "party_id",
-            "account_id"
-          ]
+          "columns": ["party_id", "account_id"]
         }
       },
       "uniqueConstraints": {},

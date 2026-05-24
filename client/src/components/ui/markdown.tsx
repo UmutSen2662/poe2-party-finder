@@ -180,7 +180,7 @@ export function MarkdownGuideDialog() {
         <DialogHeader tabIndex={0} className="focus:outline-none">
           <DialogTitle>Markdown Formatting Guide</DialogTitle>
           <DialogDescription>
-            We support standard Markdown (GFM) to help your posts stand out!
+            We support standard Markdown (GFM) for rich text formatting!
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-4">
