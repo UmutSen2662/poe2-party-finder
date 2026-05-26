@@ -1,5 +1,5 @@
 import { Clipboard, Crown, Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CreatePartyView } from "@/components/lobby/create-party-view";
 import { CustomerLobbyView } from "@/components/lobby/customer-lobby-view";
 import { HostLobbyView } from "@/components/lobby/host-lobby-view";
@@ -62,11 +62,12 @@ export function LobbyPage() {
     useState<ApplicationStatus>("Pending");
   const [applicants, setApplicants] = useState<Applicant[]>(initialApplicants);
 
-  const activeViewLabel = useMemo(() => {
-    if (view === "create") return "Empty / Create Party View";
-    if (view === "customer") return "Customer View";
-    return "Host View";
-  }, [view]);
+  const activeViewLabel =
+    view === "create"
+      ? "Empty / Create Party View"
+      : view === "customer"
+        ? "Customer View"
+        : "Host View";
 
   const saveTemplate = () => {
     setTemplates((current) => [

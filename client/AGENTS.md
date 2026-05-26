@@ -15,6 +15,7 @@
 - Use Lucide React for icons
 - Run ShadCN CLI from client directory
 - No global design tokens in this workspace
+- **React 19 Performance:** Do NOT use `useMemo` or `useCallback` - React 19's compiler handles optimization automatically. These hooks are almost always counterproductive in React 19. Use direct computation and function definitions instead.
 
 ## Commands
 - Dev server: `1420`

@@ -4,7 +4,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PartyCard } from "@/components/party-card";
 import {
   type SearchFilterState,
@@ -83,33 +83,21 @@ export function SearchPage() {
   const { data: leagues } = useSuspenseQuery(leaguesQuery);
   const { data: currencies } = useSuspenseQuery(currenciesQuery);
 
-  const filterCategories = useMemo(
-    () =>
-      categories.map((category) => ({
-        id: category.id,
-        displayName: category.name,
-      })),
-    [categories],
-  );
+  const filterCategories = categories.map((category) => ({
+    id: category.id,
+    displayName: category.name,
+  }));
 
-  const filterLeagues = useMemo(
-    () =>
-      leagues.map((league) => ({
-        id: league.id,
-        displayName: league.name,
-      })),
-    [leagues],
-  );
+  const filterLeagues = leagues.map((league) => ({
+    id: league.id,
+    displayName: league.name,
+  }));
 
-  const filterCurrencies = useMemo(
-    () =>
-      currencies.map((currency) => ({
-        id: currency.id,
-        name: currency.name,
-        icon: assetUrl(currency.icon),
-      })),
-    [currencies],
-  );
+  const filterCurrencies = currencies.map((currency) => ({
+    id: currency.id,
+    name: currency.name,
+    icon: assetUrl(currency.icon),
+  }));
 
   const [filterState, setFilterState] = useState<SearchFilterState>(() => ({
     searchQuery: "",
