@@ -45,7 +45,7 @@ export function PartyCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden z-0 bg-[#111] border p-6",
+        "relative overflow-hidden z-0 bg-[#111] border p-4",
         isDisabled ? "opacity-85 border-zinc-800/60" : "border-white/10",
         isStaleOrFresh && "group",
       )}
@@ -67,7 +67,7 @@ export function PartyCard({
           size="icon-sm"
           onClick={onRefresh}
           className={cn(
-            "absolute top-3 right-3 z-20",
+            "absolute top-3 right-3 z-20 bg-black/80",
             isFresh &&
               !isStale &&
               "opacity-0 group-hover:opacity-100 transition-all",
@@ -85,12 +85,12 @@ export function PartyCard({
       {/* Main Content */}
       <div className="flex items-stretch gap-3">
         {/* Left Column - Host Info */}
-        <div className="flex-[0.33] shrink-0 flex flex-col gap-3">
+        <div className="w-32 shrink-0 flex flex-col gap-3">
           {/* IGN and Rating */}
           <div className="flex items-center justify-between">
             <span
               className={cn(
-                "font-semibold mr-3",
+                "font-semibold mr-3 text-ellipsis whitespace-nowrap overflow-hidden",
                 isDisabled ? "text-zinc-400" : "text-white",
               )}
             >
@@ -148,7 +148,7 @@ export function PartyCard({
           {/* Description */}
           <p
             className={cn(
-              "text-sm whitespace-pre-line line-clamp-5 min-h-[5lh] drop-shadow-sm ",
+              "text-sm whitespace-pre-line line-clamp-5 min-h-[5lh] drop-shadow-sm",
               isDisabled ? "text-white/60" : "text-zinc-200",
             )}
           >
@@ -163,13 +163,18 @@ export function PartyCard({
         />
 
         {/* Right Column - Price & Action */}
-        <div className="flex-[0.33] shrink-0 flex flex-col gap-2">
+        <div className="w-32 shrink-0 flex flex-col gap-2">
           {/* Fee */}
-          <div className="flex items-center gap-2">
-            <CurrencyBadge currency={currency} showLabel={false} />
+          <div className="flex items-center gap-1">
+            <CurrencyBadge
+              size={20}
+              className="pb-0.5"
+              currency={currency}
+              showLabel={false}
+            />
             <span
               className={cn(
-                "font-bold text-base whitespace-nowrap",
+                "whitespace-nowrap",
                 isDisabled ? "text-white/60" : "text-white",
               )}
             >

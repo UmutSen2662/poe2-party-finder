@@ -17,7 +17,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <GlobalHotkeys />
       <TooltipProvider delay={200}>
-        <SidebarProvider className="w-screen h-screen">
+        <SidebarProvider defaultOpen={false} className="w-screen h-screen">
           <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="flex flex-col flex-1 h-full min-w-0 min-h-0">
             <TitleBar />

@@ -51,7 +51,7 @@ export function SearchPage() {
       />
       <div className="flex flex-col gap-4">
         <PartyCard
-          ign="ExilePro"
+          ign="ExilePro adwd"
           rating={9.5}
           category="Vaal Temple"
           categoryColor="bg-orange-500/20 text-orange-300"
