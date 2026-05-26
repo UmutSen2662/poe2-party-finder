@@ -1,7 +1,11 @@
+import type {
+  PublicApplicationStatus,
+  PublicPartyStatus,
+} from "@poe2-party-finder/server/src/routes/lobby/lobby.service";
+
 export type LobbyView = "create" | "customer" | "host";
-export type CurrencyId = "divine" | "chaos";
-export type PartyStatus = "Gathering" | "Started" | "Ended";
-export type ApplicationStatus = "Pending" | "Accepted" | "Rejected" | "Kicked";
+export type PartyStatus = PublicPartyStatus;
+export type ApplicationStatus = PublicApplicationStatus;
 export type RatingVote = "up" | "down" | null;
 
 export interface PartyFormState {
@@ -9,9 +13,9 @@ export interface PartyFormState {
   description: string;
   capacity: string;
   cost: string;
-  leagueId: string;
-  categoryId: string;
-  currencyId: CurrencyId;
+  leagueId: number | null;
+  categoryId: number | null;
+  currencyId: number;
 }
 
 export interface Template {

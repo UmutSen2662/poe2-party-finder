@@ -10,7 +10,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -52,9 +51,21 @@ import { statusBadgeClass } from "./utils";
 interface HostLobbyViewProps {
   form: PartyFormState;
   partyStatus: PartyStatus;
-  setPartyStatus: (status: PartyStatus) => void;
   applicants: Applicant[];
-  setApplicants: Dispatch<SetStateAction<Applicant[]>>;
+  onStartParty: (partyId: number) => void;
+  onEndParty: (partyId: number) => void;
+  onCancelParty: (partyId: number) => void;
+  onUpdateApplicantStatus: (
+    partyId: number,
+    playerId: number,
+    status: "Pending" | "Accepted" | "Rejected" | "Kicked",
+  ) => void;
+  onSubmitRating: (
+    giverId: number,
+    receiverId: number,
+    partyId: number,
+    value: 1 | -1,
+  ) => void;
 }
 
 function ConfirmAction({
@@ -113,9 +124,12 @@ function ConfirmAction({
 export function HostLobbyView({
   form,
   partyStatus,
-  setPartyStatus,
   applicants,
-  setApplicants,
+  onStartParty,
+  onEndParty,
+  onCancelParty,
+  onUpdateApplicantStatus,
+  onSubmitRating,
 }: HostLobbyViewProps) {
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [ratings, setRatings] = useState<Record<string, RatingVote>>({});
@@ -127,17 +141,28 @@ export function HostLobbyView({
       applicant.status === "Accepted" || applicant.status === "Kicked",
   );
 
-  const updateApplicant = (id: string, status: ApplicationStatus) => {
-    setApplicants((current) =>
-      current.map((applicant) =>
-        applicant.id === id ? { ...applicant, status } : applicant,
-      ),
-    );
+  const handleStartParty = () => {
+    onStartParty(1); // Mock party ID - should come from server state
   };
 
-  const handleEnded = () => {
-    setPartyStatus("Ended");
+  const handleEndParty = () => {
+    onEndParty(1); // Mock party ID - should come from server state
     setRatingDialogOpen(true);
+  };
+
+  const handleCancelParty = () => {
+    onCancelParty(1); // Mock party ID - should come from server state
+  };
+
+  const handleUpdateApplicantStatus = (
+    applicantId: string,
+    status: ApplicationStatus,
+  ) => {
+    onUpdateApplicantStatus(1, Number(applicantId), status); // Mock party ID
+  };
+
+  const handleSubmitRating = (applicantId: string, value: 1 | -1) => {
+    onSubmitRating(1, Number(applicantId), 1, value); // Mock IDs
   };
 
   return (
@@ -189,7 +214,7 @@ export function HostLobbyView({
                   triggerVariant={
                     partyStatus === "Started" ? "default" : "outline"
                   }
-                  onConfirm={() => setPartyStatus("Started")}
+                  onConfirm={handleStartParty}
                 />
                 <ConfirmAction
                   title="End party?"
@@ -201,7 +226,7 @@ export function HostLobbyView({
                   triggerVariant={
                     partyStatus === "Ended" ? "default" : "outline"
                   }
-                  onConfirm={handleEnded}
+                  onConfirm={handleEndParty}
                 />
                 <ConfirmAction
                   title="Cancel lobby?"
@@ -212,7 +237,7 @@ export function HostLobbyView({
                   triggerIcon={<X className="size-4" />}
                   triggerLabel="Cancel"
                   triggerVariant="destructive"
-                  onConfirm={() => setPartyStatus("Ended")}
+                  onConfirm={handleCancelParty}
                 />
               </div>
             </div>
@@ -246,9 +271,11 @@ export function HostLobbyView({
                     <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Star className="size-4 text-green-400" />
-                        {applicant.customerRating} customer rating
+                        {applicant.customerRating}
                       </span>
-                      <span>Applied {applicant.appliedAt}</span>
+                      <span className="whitespace-nowrap">
+                        Applied {applicant.appliedAt}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -256,7 +283,9 @@ export function HostLobbyView({
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() => updateApplicant(applicant.id, "Accepted")}
+                    onClick={() =>
+                      handleUpdateApplicantStatus(applicant.id, "Accepted")
+                    }
                     disabled={applicant.status === "Accepted"}
                   >
                     <UserPlus className="size-4" />
@@ -265,7 +294,9 @@ export function HostLobbyView({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => updateApplicant(applicant.id, "Rejected")}
+                    onClick={() =>
+                      handleUpdateApplicantStatus(applicant.id, "Rejected")
+                    }
                     disabled={applicant.status === "Rejected"}
                   >
                     <X className="size-4" />
@@ -274,11 +305,10 @@ export function HostLobbyView({
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => updateApplicant(applicant.id, "Kicked")}
-                    disabled={
-                      partyStatus === "Gathering" ||
-                      applicant.status === "Kicked"
+                    onClick={() =>
+                      handleUpdateApplicantStatus(applicant.id, "Kicked")
                     }
+                    disabled={applicant.status === "Kicked"}
                   >
                     <UserMinus className="size-4" />
                     Kick
@@ -316,12 +346,13 @@ export function HostLobbyView({
                       ratings[applicant.id] === "up" ? "default" : "outline"
                     }
                     size="icon"
-                    onClick={() =>
+                    onClick={() => {
                       setRatings((current) => ({
                         ...current,
                         [applicant.id]: "up",
-                      }))
-                    }
+                      }));
+                      handleSubmitRating(applicant.id, 1);
+                    }}
                   >
                     <ThumbsUp className="size-4" />
                   </Button>
@@ -332,12 +363,13 @@ export function HostLobbyView({
                         : "outline"
                     }
                     size="icon"
-                    onClick={() =>
+                    onClick={() => {
                       setRatings((current) => ({
                         ...current,
                         [applicant.id]: "down",
-                      }))
-                    }
+                      }));
+                      handleSubmitRating(applicant.id, -1);
+                    }}
                   >
                     <ThumbsDown className="size-4" />
                   </Button>

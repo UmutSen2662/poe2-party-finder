@@ -103,14 +103,13 @@ export function SearchFilters({
             disabled={disabled}
           >
             <SelectTrigger className="w-[180px] bg-card">
-              {(() => {
-                const selected = leagues.find((l) => l.id === state.leagueId);
-                return selected ? (
-                  <span data-slot="select-value">{selected.displayName}</span>
-                ) : (
-                  <SelectValue placeholder="Select League" />
-                );
-              })()}
+              <SelectValue
+                placeholder="Select League"
+                renderValue={(val) => {
+                  const selected = leagues.find((l) => l.id === Number(val));
+                  return selected?.displayName;
+                }}
+              />
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
@@ -318,18 +317,18 @@ export function SearchFilters({
                     disabled={disabled}
                   >
                     <SelectTrigger className="w-full bg-background">
-                      {(() => {
-                        const selected = currencies.find(
-                          (c) => c.id === state.currencyId,
-                        );
-                        return selected ? (
-                          <span data-slot="select-value">
+                      <SelectValue
+                        placeholder="Any currency"
+                        renderValue={(val) => {
+                          if (val === "all") return "Any currency";
+                          const selected = currencies.find(
+                            (c) => c.id === Number(val),
+                          );
+                          return selected ? (
                             <CurrencyBadge currency={selected} />
-                          </span>
-                        ) : (
-                          <span data-slot="select-value">Any currency</span>
-                        );
-                      })()}
+                          ) : null;
+                        }}
+                      />
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>

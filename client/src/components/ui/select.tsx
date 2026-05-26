@@ -11,19 +11,18 @@ function SelectGroup({ ...props }: SelectPrimitive.Group.Props) {
 
 function SelectValue({
   placeholder,
+  renderValue,
   ...props
 }: SelectPrimitive.Value.Props & {
   placeholder?: string;
+  renderValue?: (value: string) => React.ReactNode;
 }) {
-  if (!placeholder) {
-    return <SelectPrimitive.Value data-slot="select-value" {...props} />;
-  }
-
   return (
     <SelectPrimitive.Value
       render={(_, { value }) => {
         if (value) {
-          return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+          const display = renderValue ? renderValue(value) : value;
+          return <span data-slot="select-value">{display}</span>;
         }
 
         // Placeholder

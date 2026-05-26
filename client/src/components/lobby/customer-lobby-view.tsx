@@ -22,11 +22,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  activeCategories,
-  activeLeagues,
-  applicationStatuses,
-} from "./mock-data";
 import type {
   Applicant,
   ApplicationStatus,
@@ -34,34 +29,26 @@ import type {
   PartyStatus,
   RatingVote,
 } from "./types";
-import { fieldLabelById, statusBadgeClass } from "./utils";
+import { statusBadgeClass } from "./utils";
 
 interface CustomerLobbyViewProps {
   form: PartyFormState;
   applicationStatus: ApplicationStatus;
-  setApplicationStatus: (status: ApplicationStatus) => void;
   partyStatus: PartyStatus;
   applicants: Applicant[];
+  onCancelApplication: (partyId: number, playerId: number) => void;
 }
 
 export function CustomerLobbyView({
   form,
   applicationStatus,
-  setApplicationStatus,
   partyStatus,
   applicants,
+  onCancelApplication,
 }: CustomerLobbyViewProps) {
   const [hostRating, setHostRating] = useState<RatingVote>(null);
-  const categoryName = fieldLabelById(
-    activeCategories,
-    form.categoryId,
-    "Unknown category",
-  );
-  const leagueName = fieldLabelById(
-    activeLeagues,
-    form.leagueId,
-    "Unknown league",
-  );
+  const categoryName = "Category Name"; // Will come from server data
+  const leagueName = "League Name"; // Will come from server data
   const canCopyWhisper = applicationStatus === "Accepted";
   const canCancel = partyStatus === "Gathering";
   const visibleParticipants = applicants.filter(
@@ -73,6 +60,11 @@ export function CustomerLobbyView({
   const copyWhisper = () => {
     if (!canCopyWhisper) return;
     void navigator.clipboard.writeText(whisperText);
+  };
+
+  const handleCancelApplication = () => {
+    // Mock party and player IDs - these should come from server state
+    onCancelApplication(1, 1);
   };
 
   return (
@@ -108,7 +100,16 @@ export function CustomerLobbyView({
                 <div className="text-xs text-zinc-400">Cost</div>
                 <div className="mt-1 flex items-center gap-2 text-lg font-semibold text-white">
                   {form.cost}
-                  <CurrencyBadge currency={form.currencyId} showLabel={false} />
+                  <CurrencyBadge
+                    currency={
+                      form.currencyId === 1
+                        ? "divine"
+                        : form.currencyId === 2
+                          ? "chaos"
+                          : "divine"
+                    }
+                    showLabel={false}
+                  />
                 </div>
               </div>
             </div>
@@ -119,36 +120,38 @@ export function CustomerLobbyView({
           </div>
 
           <div className="grid gap-3 md:grid-cols-4">
-            {applicationStatuses.map((status, index) => {
-              const activeIndex =
-                applicationStatuses.indexOf(applicationStatus);
-              const isActive = status === applicationStatus;
-              const isPast =
-                index < activeIndex &&
-                applicationStatus !== "Rejected" &&
-                applicationStatus !== "Kicked";
+            {["Pending", "Accepted", "Rejected", "Kicked"].map(
+              (status, index) => {
+                const statuses = ["Pending", "Accepted", "Rejected", "Kicked"];
+                const activeIndex = statuses.indexOf(applicationStatus);
+                const isActive = status === applicationStatus;
+                const isPast =
+                  index < activeIndex &&
+                  applicationStatus !== "Rejected" &&
+                  applicationStatus !== "Kicked";
 
-              return (
-                <div
-                  key={status}
-                  className={cn(
-                    "rounded-lg border p-3 text-sm",
-                    isActive && statusBadgeClass(status),
-                    isPast &&
-                      "border-green-500/30 bg-green-500/10 text-green-300",
-                  )}
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    {isPast ? (
-                      <Check className="size-4" />
-                    ) : (
-                      <span className="size-2 rounded-full bg-current" />
+                return (
+                  <div
+                    key={status}
+                    className={cn(
+                      "rounded-lg border p-3 text-sm",
+                      isActive && statusBadgeClass(status),
+                      isPast &&
+                        "border-green-500/30 bg-green-500/10 text-green-300",
                     )}
-                    {status}
+                  >
+                    <div className="flex items-center gap-2 font-medium">
+                      {isPast ? (
+                        <Check className="size-4" />
+                      ) : (
+                        <span className="size-2 rounded-full bg-current" />
+                      )}
+                      {status}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              },
+            )}
           </div>
 
           <Card className="bg-background/40">
@@ -189,7 +192,11 @@ export function CustomerLobbyView({
           </Card>
         </CardContent>
         <CardFooter className="justify-between gap-3 border-t">
-          <Button variant="outline" disabled={!canCancel}>
+          <Button
+            variant="outline"
+            disabled={!canCancel}
+            onClick={handleCancelApplication}
+          >
             Cancel Application
           </Button>
           <Button disabled={!canCopyWhisper} onClick={copyWhisper}>
@@ -200,25 +207,6 @@ export function CustomerLobbyView({
       </Card>
 
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Mock Controls</CardTitle>
-            <CardDescription>Preview each application status.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            {applicationStatuses.map((status) => (
-              <Button
-                key={status}
-                variant={applicationStatus === status ? "default" : "outline"}
-                onClick={() => setApplicationStatus(status)}
-                className="justify-start"
-              >
-                {status}
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

@@ -1,134 +1,421 @@
-import { Clipboard, Crown, Plus } from "lucide-react";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { CreatePartyView } from "@/components/lobby/create-party-view";
 import { CustomerLobbyView } from "@/components/lobby/customer-lobby-view";
 import { HostLobbyView } from "@/components/lobby/host-lobby-view";
-import {
-  initialApplicants,
-  initialFormState,
-  initialTemplates,
-} from "@/components/lobby/mock-data";
 import type {
-  Applicant,
   ApplicationStatus,
-  LobbyView,
   PartyFormState,
   PartyStatus,
-  Template,
 } from "@/components/lobby/types";
 import { statusBadgeClass } from "@/components/lobby/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { api, assetUrl } from "@/lib/eden";
 
-function ViewSwitcher({
-  view,
-  setView,
-}: {
-  view: LobbyView;
-  setView: (view: LobbyView) => void;
-}) {
-  return (
-    <Card className="p-1 flex-row gap-1 w-fit rounded-lg bg-muted/60">
-      {[
-        { id: "create" as const, label: "Create", icon: Plus },
-        { id: "customer" as const, label: "Customer", icon: Clipboard },
-        { id: "host" as const, label: "Host", icon: Crown },
-      ].map((item) => {
-        const Icon = item.icon;
+// Mock player ID - this should come from auth/session in production
+const MOCK_PLAYER_ID = 1;
 
-        return (
-          <Button
-            key={item.id}
-            variant={view === item.id ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView(item.id)}
-          >
-            <Icon className="size-4" />
-            {item.label}
-          </Button>
-        );
-      })}
-    </Card>
-  );
+const categoriesQuery = queryOptions({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const { data, error } = await api.categories.get();
+    if (error) throw error;
+    return data;
+  },
+});
+
+const leaguesQuery = queryOptions({
+  queryKey: ["leagues", { activeOnly: true }],
+  queryFn: async () => {
+    const { data, error } = await api.leagues.get({
+      $query: { activeOnly: true },
+    });
+    if (error) throw error;
+    return data;
+  },
+});
+
+const currenciesQuery = queryOptions({
+  queryKey: ["currencies"],
+  queryFn: async () => {
+    const { data, error } = await api.currencies.get();
+    if (error) throw error;
+    return data;
+  },
+});
+
+const lobbyStateQuery = queryOptions({
+  queryKey: ["lobby", "state"],
+  queryFn: async () => {
+    const { data, error } = await api.lobby.state.get({
+      $query: { playerId: MOCK_PLAYER_ID },
+    });
+    if (error) throw error;
+    return data;
+  },
+});
+
+const templatesQuery = queryOptions({
+  queryKey: ["lobby", "templates"],
+  queryFn: async () => {
+    const { data, error } = await api.lobby.templates.get({
+      $query: { playerId: MOCK_PLAYER_ID },
+    });
+    if (error) throw error;
+    return data;
+  },
+});
+
+function applicantsQuery(partyId: number) {
+  return queryOptions({
+    queryKey: ["lobby", "applicants", partyId],
+    queryFn: async () => {
+      const { data, error } = await api.parties[partyId].applications.get({
+        $query: { hostId: MOCK_PLAYER_ID },
+      });
+      if (error) throw error;
+      return data;
+    },
+  });
 }
 
 export function LobbyPage() {
-  const [view, setView] = useState<LobbyView>("create");
-  const [form, setForm] = useState<PartyFormState>(initialFormState);
-  const [templates, setTemplates] = useState<Template[]>(initialTemplates);
-  const [partyStatus, setPartyStatus] = useState<PartyStatus>("Gathering");
-  const [applicationStatus, setApplicationStatus] =
-    useState<ApplicationStatus>("Pending");
-  const [applicants, setApplicants] = useState<Applicant[]>(initialApplicants);
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<PartyFormState>({
+    title: "",
+    description: "",
+    capacity: "1",
+    cost: "0",
+    leagueId: null,
+    categoryId: null,
+    currencyId: 1,
+  });
+
+  // Fetch lookup data
+  const { data: categories } = useSuspenseQuery(categoriesQuery);
+  const { data: leagues } = useSuspenseQuery(leaguesQuery);
+  const { data: currencies } = useSuspenseQuery(currenciesQuery);
+
+  // Fetch lobby state
+  const { data: lobbyState } = useQuery(lobbyStateQuery);
+
+  // Fetch templates
+  const { data: serverTemplates } = useQuery(templatesQuery);
+
+  // Fetch applicants when in host mode
+  const partyId = lobbyState?.kind === "host" ? lobbyState.party.id : undefined;
+  const { data: applicants } = useQuery({
+    ...applicantsQuery(partyId || 0),
+    enabled: partyId !== undefined,
+  });
+
+  // Normalize data for components
+  const normalizedCategories = categories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    imagePath: category.image,
+  }));
+
+  const normalizedLeagues = leagues.map((league) => ({
+    id: league.id,
+    name: league.name,
+  }));
+
+  const normalizedCurrencies = currencies.map((currency) => ({
+    id: currency.id,
+    name: currency.name,
+    icon: assetUrl(currency.icon),
+  }));
+
+  const normalizedTemplates = (serverTemplates || []).map(
+    (template, index) => ({
+      id: `template-${index}`,
+      name: template.name,
+      data: {
+        title: template.title || "",
+        description: template.description || "",
+        capacity: template.capacity?.toString() || "1",
+        cost: template.cost?.toString() || "0",
+        leagueId: template.leagueId || null,
+        categoryId: template.categoryId || null,
+        currencyId: template.currencyId || 1,
+      } as PartyFormState,
+    }),
+  );
+
+  // Derive state from server data
+  const partyStatus: PartyStatus =
+    lobbyState?.kind === "host"
+      ? (lobbyState.party.status as PartyStatus)
+      : "Gathering";
+
+  const applicationStatus: ApplicationStatus =
+    lobbyState?.kind === "customer"
+      ? (lobbyState.application.status as ApplicationStatus)
+      : "Pending";
+
+  const normalizedApplicants = (applicants || []).map((applicant) => {
+    const status: ApplicationStatus = applicant.status as ApplicationStatus;
+    return {
+      id: String(applicant.playerId),
+      ign: applicant.ign,
+      customerRating: applicant.customerRating,
+      appliedAt: new Date(applicant.appliedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      status,
+    };
+  });
+
+  // Mutations
+  const createPartyMutation = useMutation({
+    mutationFn: async (payload: {
+      title: string;
+      description?: string;
+      capacity: number;
+      cost: number;
+      leagueId: number;
+      categoryId: number;
+      currencyId: number;
+    }) => {
+      const { data, error } = await api.parties.post({
+        ...payload,
+        hostId: MOCK_PLAYER_ID,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
+    },
+  });
+
+  const updatePartyStatusMutation = useMutation({
+    mutationFn: async ({
+      partyId,
+      status,
+    }: {
+      partyId: number;
+      status: "Gathering" | "Started" | "Ended";
+    }) => {
+      const { data, error } = await api.parties[partyId].status.put({
+        status,
+        hostId: MOCK_PLAYER_ID,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
+    },
+  });
+
+  const cancelPartyMutation = useMutation({
+    mutationFn: async (partyId: number) => {
+      const { data, error } = await api.parties[partyId].delete({
+        $query: { hostId: MOCK_PLAYER_ID },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["parties"] });
+    },
+  });
+
+  const updateApplicationStatusMutation = useMutation({
+    mutationFn: async ({
+      partyId,
+      playerId,
+      status,
+    }: {
+      partyId: number;
+      playerId: number;
+      status: "Pending" | "Accepted" | "Rejected" | "Kicked";
+    }) => {
+      const { data, error } = await api.applications[partyId][
+        playerId
+      ].status.put({
+        status,
+        hostId: MOCK_PLAYER_ID,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, { partyId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["lobby", "applicants", partyId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+    },
+  });
+
+  const cancelApplicationMutation = useMutation({
+    mutationFn: async ({
+      partyId,
+      playerId,
+    }: {
+      partyId: number;
+      playerId: number;
+    }) => {
+      const { data, error } = await api.applications[partyId][playerId].delete({
+        $query: { requesterPlayerId: MOCK_PLAYER_ID },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+    },
+  });
+
+  const submitRatingMutation = useMutation({
+    mutationFn: async ({
+      giverId,
+      receiverId,
+      partyId,
+      value,
+    }: {
+      giverId: number;
+      receiverId: number;
+      partyId: number;
+      value: 1 | -1;
+    }) => {
+      const { data, error } = await api.ratings.post({
+        giverId,
+        receiverId,
+        partyId,
+        value,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["players"] });
+    },
+  });
+
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (templateIndex: number) => {
+      const { data, error } = await api.lobby.templates[templateIndex].delete({
+        $query: { playerId: MOCK_PLAYER_ID },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "templates"] });
+    },
+  });
+
+  // Determine view based on lobby state (fully server-driven)
+  const activeView =
+    lobbyState?.kind === "host"
+      ? "host"
+      : lobbyState?.kind === "customer"
+        ? "customer"
+        : "create";
 
   const activeViewLabel =
-    view === "create"
+    activeView === "create"
       ? "Empty / Create Party View"
-      : view === "customer"
+      : activeView === "customer"
         ? "Customer View"
         : "Host View";
 
-  const saveTemplate = () => {
-    setTemplates((current) => [
-      ...current,
-      {
-        id: `template-${current.length + 1}`,
-        name: form.title || `Template ${current.length + 1}`,
-        data: form,
-      },
-    ]);
+  const saveTemplate = async () => {
+    const { error } = await api.lobby.templates.post({
+      $query: { playerId: MOCK_PLAYER_ID },
+      name: form.title || "Untitled Template",
+      text: form.description,
+      title: form.title,
+      description: form.description,
+      capacity: Number(form.capacity),
+      cost: Number(form.cost),
+      leagueId: form.leagueId || undefined,
+      categoryId: form.categoryId || undefined,
+      currencyId: form.currencyId,
+    });
+    if (!error) {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "templates"] });
+    }
   };
 
   return (
     <div className="flex w-full flex-col gap-6 p-6 mx-auto max-w-6xl">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Lobby</h1>
-          <p className="mt-2 text-muted-foreground">
-            Unified active-session hub for creating, joining, and managing
-            parties.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Dev state switcher
-          </div>
-          <ViewSwitcher view={view} setView={setView} />
-        </div>
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight">Lobby</h1>
+        <p className="mt-2 text-muted-foreground">
+          Unified active-session hub for creating, joining, and managing
+          parties.
+        </p>
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline">{activeViewLabel}</Badge>
-        <Badge className={statusBadgeClass(partyStatus)}>
-          Party: {partyStatus}
-        </Badge>
+        {lobbyState?.kind !== "empty" && (
+          <Badge className={statusBadgeClass(partyStatus)}>
+            Party: {partyStatus}
+          </Badge>
+        )}
       </div>
 
-      {view === "create" && (
+      {activeView === "create" && (
         <CreatePartyView
           form={form}
           setForm={setForm}
-          templates={templates}
+          templates={normalizedTemplates}
+          categories={normalizedCategories}
+          leagues={normalizedLeagues}
+          currencies={normalizedCurrencies}
           onSaveTemplate={saveTemplate}
+          onDeleteTemplate={(index) => deleteTemplateMutation.mutate(index)}
+          onCreateParty={(payload) => createPartyMutation.mutate(payload)}
         />
       )}
-      {view === "customer" && (
+      {activeView === "customer" && (
         <CustomerLobbyView
           form={form}
           applicationStatus={applicationStatus}
-          setApplicationStatus={setApplicationStatus}
           partyStatus={partyStatus}
-          applicants={applicants}
+          applicants={normalizedApplicants}
+          onCancelApplication={(partyId, playerId) =>
+            cancelApplicationMutation.mutate({ partyId, playerId })
+          }
         />
       )}
-      {view === "host" && (
+      {activeView === "host" && (
         <HostLobbyView
           form={form}
           partyStatus={partyStatus}
-          setPartyStatus={setPartyStatus}
-          applicants={applicants}
-          setApplicants={setApplicants}
+          applicants={normalizedApplicants}
+          onStartParty={(partyId) =>
+            updatePartyStatusMutation.mutate({ partyId, status: "Started" })
+          }
+          onEndParty={(partyId) =>
+            updatePartyStatusMutation.mutate({ partyId, status: "Ended" })
+          }
+          onCancelParty={(partyId) => cancelPartyMutation.mutate(partyId)}
+          onUpdateApplicantStatus={(partyId, playerId, status) =>
+            updateApplicationStatusMutation.mutate({
+              partyId,
+              playerId,
+              status,
+            })
+          }
+          onSubmitRating={(giverId, receiverId, partyId, value) =>
+            submitRatingMutation.mutate({ giverId, receiverId, partyId, value })
+          }
         />
       )}
     </div>

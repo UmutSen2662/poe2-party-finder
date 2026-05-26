@@ -1,8 +1,18 @@
-import { FileText, Plus, Save } from "lucide-react";
+import { FileText, Plus, Save, Trash2 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { CurrencyBadge } from "@/components/currency-badge";
 import { PartyCard } from "@/components/party-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -38,25 +48,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { activeCategories, activeLeagues, currencies } from "./mock-data";
-import type { CurrencyId, PartyFormState, Template } from "./types";
+import { assetUrl } from "@/lib/eden";
+import type { PartyFormState, Template } from "./types";
 import { statusBadgeClass } from "./utils";
 
 interface CreatePartyViewProps {
   form: PartyFormState;
   setForm: Dispatch<SetStateAction<PartyFormState>>;
   templates: Template[];
+  categories: Array<{ id: number; name: string; imagePath: string | null }>;
+  leagues: Array<{ id: number; name: string }>;
+  currencies: Array<{ id: number; name: string; icon: string | null }>;
   onSaveTemplate: () => void;
+  onDeleteTemplate: (index: number) => void;
+  onCreateParty: (payload: {
+    title: string;
+    description?: string;
+    capacity: number;
+    cost: number;
+    leagueId: number;
+    categoryId: number;
+    currencyId: number;
+  }) => void;
 }
 
 export function CreatePartyView({
   form,
   setForm,
   templates,
+  categories,
+  leagues,
+  currencies,
   onSaveTemplate,
+  onDeleteTemplate,
+  onCreateParty,
 }: CreatePartyViewProps) {
   const [templatesOpen, setTemplatesOpen] = useState(false);
-  const selectedCategory = activeCategories.find(
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<number | null>(null);
+  const selectedCategory = categories.find(
     (category) => category.id === form.categoryId,
   );
 
@@ -67,6 +97,34 @@ export function CreatePartyView({
   const applyTemplate = (template: Template) => {
     setForm(template.data);
     setTemplatesOpen(false);
+  };
+
+  const handleDeleteTemplate = (index: number) => {
+    setTemplateToDelete(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteTemplate = () => {
+    if (templateToDelete !== null) {
+      onDeleteTemplate(templateToDelete);
+      setDeleteDialogOpen(false);
+      setTemplateToDelete(null);
+    }
+  };
+
+  const handleCreateParty = () => {
+    if (!form.title || !form.leagueId || !form.categoryId || !form.currencyId) {
+      return;
+    }
+    onCreateParty({
+      title: form.title,
+      description: form.description || undefined,
+      capacity: Number(form.capacity),
+      cost: Number(form.cost),
+      leagueId: form.leagueId,
+      categoryId: form.categoryId,
+      currencyId: form.currencyId,
+    });
   };
 
   return (
@@ -97,25 +155,52 @@ export function CreatePartyView({
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3">
-                  {templates.map((template) => (
-                    <button
-                      key={template.id}
-                      type="button"
-                      onClick={() => applyTemplate(template)}
-                      className="w-full rounded-lg border bg-background/40 p-3 text-left transition-colors hover:bg-accent/50"
-                    >
-                      <div className="font-medium">{template.name}</div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{template.data.cost}</span>
-                        <CurrencyBadge
-                          currency={template.data.currencyId}
-                          showLabel={false}
-                          size={14}
-                        />
-                        <span>{template.data.capacity} spots</span>
+                  {templates.map((template, index) => {
+                    const leagueName =
+                      leagues.find((l) => l.id === template.data.leagueId)
+                        ?.name || "Unknown";
+                    const categoryName =
+                      categories.find((c) => c.id === template.data.categoryId)
+                        ?.name || "Unknown";
+                    const currencyName =
+                      currencies.find((c) => c.id === template.data.currencyId)
+                        ?.name || "Unknown";
+
+                    return (
+                      <div
+                        key={template.id}
+                        className="flex items-center gap-2 rounded-lg border bg-background/40 p-3 transition-colors hover:bg-accent/50"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => applyTemplate(template)}
+                          className="flex-1 text-left"
+                        >
+                          <div className="font-medium">{template.name}</div>
+                          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{template.data.cost}</span>
+                            <CurrencyBadge
+                              currency={{ name: currencyName, icon: null }}
+                              showLabel={false}
+                              size={14}
+                            />
+                            <span>{template.data.capacity} spots</span>
+                            <span>• {leagueName}</span>
+                            <span>• {categoryName}</span>
+                          </div>
+                        </button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteTemplate(index)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
                       </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={onSaveTemplate}>
@@ -125,6 +210,29 @@ export function CreatePartyView({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <AlertDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Template</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this template? This action
+                    cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={confirmDeleteTemplate}
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardHeader>
         <CardContent>
@@ -133,18 +241,26 @@ export function CreatePartyView({
               <Field>
                 <FieldLabel>League</FieldLabel>
                 <Select
-                  value={form.leagueId}
+                  value={form.leagueId?.toString() || ""}
                   onValueChange={(value) =>
-                    updateForm({ leagueId: value || "" })
+                    updateForm({ leagueId: value ? Number(value) : null })
                   }
                 >
                   <SelectTrigger className="w-full bg-card">
-                    <SelectValue placeholder="Select league" />
+                    <SelectValue
+                      placeholder="Select league"
+                      renderValue={(val) => {
+                        const selected = leagues.find(
+                          (l) => l.id === Number(val),
+                        );
+                        return selected?.name;
+                      }}
+                    />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      {activeLeagues.map((league) => (
-                        <SelectItem key={league.id} value={league.id}>
+                      {leagues.map((league) => (
+                        <SelectItem key={league.id} value={String(league.id)}>
                           {league.name}
                         </SelectItem>
                       ))}
@@ -159,18 +275,29 @@ export function CreatePartyView({
               <Field>
                 <FieldLabel>Category</FieldLabel>
                 <Select
-                  value={form.categoryId}
+                  value={form.categoryId?.toString() || ""}
                   onValueChange={(value) =>
-                    updateForm({ categoryId: value || "" })
+                    updateForm({ categoryId: value ? Number(value) : null })
                   }
                 >
                   <SelectTrigger className="w-full bg-card">
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue
+                      placeholder="Select category"
+                      renderValue={(val) => {
+                        const selected = categories.find(
+                          (c) => c.id === Number(val),
+                        );
+                        return selected?.name;
+                      }}
+                    />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
-                      {activeCategories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category.id}
+                          value={String(category.id)}
+                        >
                           {category.name}
                         </SelectItem>
                       ))}
@@ -220,7 +347,13 @@ export function CreatePartyView({
                   }
                 >
                   <SelectTrigger className="w-full bg-card">
-                    <SelectValue placeholder="Select capacity" />
+                    <SelectValue
+                      placeholder="Select capacity"
+                      renderValue={(val) => {
+                        const num = Number(val);
+                        return `${num} ${num === 1 ? "spot" : "spots"}`;
+                      }}
+                    />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
@@ -249,21 +382,42 @@ export function CreatePartyView({
               <Field>
                 <FieldLabel>Currency</FieldLabel>
                 <Select
-                  value={form.currencyId}
+                  value={String(form.currencyId)}
                   onValueChange={(value) =>
-                    updateForm({
-                      currencyId: (value || "divine") as CurrencyId,
-                    })
+                    updateForm({ currencyId: Number(value) })
                   }
                 >
                   <SelectTrigger className="w-full bg-card">
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue
+                      placeholder="Select currency"
+                      renderValue={(val) => {
+                        const selected = currencies.find(
+                          (c) => c.id === Number(val),
+                        );
+                        return selected ? (
+                          <CurrencyBadge
+                            currency={{
+                              name: selected.name,
+                              icon: selected.icon,
+                            }}
+                          />
+                        ) : null;
+                      }}
+                    />
                   </SelectTrigger>
                   <SelectPositioner>
                     <SelectContent>
                       {currencies.map((currency) => (
-                        <SelectItem key={currency.id} value={currency.id}>
-                          <CurrencyBadge currency={currency.id} />
+                        <SelectItem
+                          key={currency.id}
+                          value={String(currency.id)}
+                        >
+                          <CurrencyBadge
+                            currency={{
+                              name: currency.name,
+                              icon: currency.icon,
+                            }}
+                          />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -278,7 +432,7 @@ export function CreatePartyView({
             Will create as{" "}
             <Badge className={statusBadgeClass("Gathering")}>Gathering</Badge>
           </div>
-          <Button>
+          <Button onClick={handleCreateParty}>
             <Plus className="size-4" />
             Create Lobby
           </Button>
@@ -296,10 +450,21 @@ export function CreatePartyView({
           ign="HostCarry"
           rating={9.5}
           category={selectedCategory?.name ?? "Unknown Category"}
-          categoryImage={null}
+          categoryImage={
+            selectedCategory?.imagePath
+              ? assetUrl(selectedCategory.imagePath)
+              : undefined
+          }
+          currency={{
+            name:
+              currencies.find((c) => c.id === form.currencyId)?.name ||
+              "Unknown",
+            icon: assetUrl(
+              currencies.find((c) => c.id === form.currencyId)?.icon,
+            ),
+          }}
           description={form.description || "No description yet."}
           fee={Number(form.cost) || 0}
-          currency={form.currencyId}
           currentQueue={0}
           maxQueue={Number(form.capacity) || 1}
           onApply={() => undefined}
