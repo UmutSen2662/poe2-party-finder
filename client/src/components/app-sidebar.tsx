@@ -1,5 +1,5 @@
 import { useHotkey } from "@tanstack/react-hotkeys";
-import { FlaskConical, HomeIcon, Mail, Settings } from "lucide-react";
+import { FlaskConical, HomeIcon, Settings, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
@@ -24,7 +24,7 @@ interface AppSidebarProps {
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   // Navigation Hotkeys
   useHotkey("Mod+1", () => setActiveTab("home"));
-  useHotkey("Mod+2", () => setActiveTab("posts"));
+  useHotkey("Mod+2", () => setActiveTab("lobby"));
   useHotkey("Mod+3", () => setActiveTab("test"));
   useHotkey("Mod+4", () => setActiveTab("settings"));
 
@@ -75,7 +75,7 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
                   tooltip={{
                     children: (
                       <div className="flex items-center gap-2">
-                        Posts
+                        Lobby
                         <KbdGroup>
                           <Kbd>Ctrl</Kbd>
                           <Kbd>2</Kbd>
@@ -83,11 +83,11 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
                       </div>
                     ),
                   }}
-                  isActive={activeTab === "posts"}
-                  onClick={() => setActiveTab("posts")}
+                  isActive={activeTab === "lobby"}
+                  onClick={() => setActiveTab("lobby")}
                 >
-                  <Mail />
-                  <span>Posts</span>
+                  <Users />
+                  <span>Lobby</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
