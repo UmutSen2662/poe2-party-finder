@@ -296,16 +296,12 @@ export function CreatePartyView({
           ign="HostCarry"
           rating={9.5}
           category={selectedCategory?.name ?? "Unknown Category"}
-          categoryColor={
-            selectedCategory?.color ?? "bg-secondary text-secondary-foreground"
-          }
+          categoryImage={null}
           description={form.description || "No description yet."}
           fee={Number(form.cost) || 0}
           currency={form.currencyId}
           currentQueue={0}
           maxQueue={Number(form.capacity) || 1}
-          isFresh={false}
-          isStale={false}
           onApply={() => undefined}
         />
       </div>

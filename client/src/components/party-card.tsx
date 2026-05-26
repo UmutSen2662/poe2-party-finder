@@ -3,21 +3,38 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { formatRelativeTime, useNow } from "@/lib/use-now";
 import { cn } from "@/lib/utils";
-import { CurrencyBadge } from "./currency-badge";
+import {
+  CurrencyBadge,
+  type CurrencyInput,
+  normalizeCurrency,
+} from "./currency-badge";
+
+/**
+ * After this many ms with no refresh, the per-card data is considered stale
+ * and the refresh button surfaces an "UPDATE" affordance.
+ */
+const STALE_THRESHOLD_MS = 3 * 60 * 1000;
 
 interface PartyCardProps {
   ign: string;
   rating: number;
   category: string;
-  categoryColor: string;
+  categoryImage?: string | null;
   description: string;
   fee: number;
-  currency: "divine" | "chaos";
+  currency: CurrencyInput;
   currentQueue: number;
   maxQueue: number;
-  isFresh?: boolean;
-  isStale?: boolean;
+  /** Server-provided creation time. Drives the live "Listed Xm ago" label. */
+  createdAt?: Date | string | null;
+  /**
+   * Local timestamp (ms) of when this card's data was last fetched/refreshed.
+   * When provided, the refresh button is shown and staleness is computed from
+   * how long it's been since this value.
+   */
+  lastRefreshedAt?: number;
   isDisabled?: boolean;
   onRefresh?: () => void;
   onApply?: () => void;
@@ -27,50 +44,64 @@ export function PartyCard({
   ign,
   rating,
   category,
-  categoryColor,
+  categoryImage,
   description,
   fee,
   currency,
   currentQueue,
   maxQueue,
-  isFresh = true,
-  isStale = false,
+  createdAt,
+  lastRefreshedAt,
   isDisabled = false,
   onRefresh,
   onApply,
 }: PartyCardProps) {
-  const isStaleOrFresh = !isDisabled;
-  const showRefreshButton = isStale || isFresh;
+  const now = useNow();
+  const createdAtMs = createdAt ? new Date(createdAt).getTime() : null;
+  const canRefresh = lastRefreshedAt !== undefined && !isDisabled;
+  const isStale =
+    canRefresh && now - (lastRefreshedAt as number) > STALE_THRESHOLD_MS;
 
   return (
     <Card
       className={cn(
         "relative overflow-hidden z-0 bg-[#111] border p-4",
         isDisabled ? "opacity-85 border-zinc-800/60" : "border-white/10",
-        isStaleOrFresh && "group",
+        canRefresh && "group",
       )}
     >
-      {/* Ambient Image Fade Background */}
+      {/* Ambient Category Background */}
       <div
         className={cn(
-          "absolute inset-0 z-[-1] pointer-events-none",
+          "absolute inset-0 z-[-1] pointer-events-none overflow-hidden",
           isDisabled && "grayscale opacity-40",
         )}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#9a3412]/40 via-[#9a3412]/10 to-transparent mix-blend-screen" />
+        {categoryImage ? (
+          <div
+            className="absolute inset-0 bg-no-repeat bg-left bg-contain opacity-40 mix-blend-screen"
+            style={{
+              backgroundImage: `url(${categoryImage})`,
+              WebkitMaskImage:
+                "linear-gradient(to right, black 0%, black 25%, transparent 75%)",
+              maskImage:
+                "linear-gradient(to right, black 0%, black 25%, transparent 75%)",
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/10 to-transparent mix-blend-screen" />
+        )}
       </div>
 
       {/* Refresh Button */}
-      {showRefreshButton && (
+      {canRefresh && (
         <Button
           variant={isStale ? "secondary" : "ghost"}
           size="icon-sm"
           onClick={onRefresh}
           className={cn(
             "absolute top-3 right-3 z-20 bg-black/80",
-            isFresh &&
-              !isStale &&
-              "opacity-0 group-hover:opacity-100 transition-all",
+            !isStale && "opacity-0 group-hover:opacity-100 transition-all",
             isStale &&
               "opacity-100 bg-amber-600/20 text-amber-400 hover:bg-amber-600/30",
           )}
@@ -121,10 +152,14 @@ export function PartyCard({
           </div>
 
           {/* Listed Time */}
-          <div className="mt-auto flex items-center gap-1">
-            <Clock className="w-3 h-3 text-white/60" />
-            <p className="text-xs text-white/60">Listed 2m ago</p>
-          </div>
+          {createdAtMs !== null && (
+            <div className="mt-auto flex items-center gap-1">
+              <Clock className="w-3 h-3 text-white/60" />
+              <p className="text-xs text-white/60">
+                Listed {formatRelativeTime(createdAtMs, now)}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Vertical Divider */}
@@ -136,12 +171,7 @@ export function PartyCard({
         {/* Middle Column - Details */}
         <div className="flex-1 min-w-0 h-full flex flex-col justify-center">
           {/* Category Pill */}
-          <Badge
-            className={cn(
-              "text-[10px] font-bold uppercase tracking-wider w-fit mb-2",
-              categoryColor,
-            )}
-          >
+          <Badge className="text-[10px] font-bold uppercase tracking-wider w-fit mb-2 bg-white/10 text-white">
             {category}
           </Badge>
 
@@ -178,7 +208,7 @@ export function PartyCard({
                 isDisabled ? "text-white/60" : "text-white",
               )}
             >
-              {fee} {currency === "divine" ? "Divines" : "Chaos Orbs"}
+              {fee} {normalizeCurrency(currency).name}
             </span>
           </div>
 

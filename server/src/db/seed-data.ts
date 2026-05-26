@@ -9,17 +9,13 @@
 export const categories = {
   target: "categories",
   rows: [
-    { id: 1, displayName: "Vaal Temple", imagePath: "vaal_temple.png" },
-    { id: 2, displayName: "Arbiter", imagePath: "arbiter.png" },
-    { id: 3, displayName: "Leveling", imagePath: "leveling.png" },
-    { id: 4, displayName: "Xesth", imagePath: "xesth.png" },
-    {
-      id: 5,
-      displayName: "King of the Mists",
-      imagePath: "king_of_the_mists.png",
-    },
-    { id: 6, displayName: "Olroth", imagePath: "olroth.png" },
-    { id: 7, displayName: "Gold", imagePath: "gold.png" },
+    { id: 1, displayName: "Vaal Temple", imagePath: null },
+    { id: 2, displayName: "Arbiter", imagePath: null },
+    { id: 3, displayName: "Leveling", imagePath: null },
+    { id: 4, displayName: "Xesth", imagePath: null },
+    { id: 5, displayName: "King of the Mists", imagePath: null },
+    { id: 6, displayName: "Olroth", imagePath: null },
+    { id: 7, displayName: "Gold", imagePath: null },
   ],
 };
 
@@ -36,9 +32,9 @@ export const leagues = {
 export const currencies = {
   target: "currencies",
   rows: [
-    { id: 1, name: "Chaos Orb", icon: "chaos.png" },
-    { id: 2, name: "Divine Orb", icon: "divine.png" },
-    { id: 3, name: "Exalted Orb", icon: "exalt.png" },
+    { id: 1, name: "Chaos Orb", icon: null },
+    { id: 2, name: "Divine Orb", icon: null },
+    { id: 3, name: "Exalted Orb", icon: null },
   ],
 };
 
@@ -98,8 +94,8 @@ export const players = {
       templates: [
         { name: "Fast Olroth", text: "WTS Olroth Kill, fast and safe." },
       ],
-      hostRating: 98.5,
-      customerRating: 100,
+      hostRating: 9.85,
+      customerRating: 10,
       hostThumbsUp: 150,
       hostThumbsDown: 2,
       customerThumbsUp: 45,
@@ -110,8 +106,8 @@ export const players = {
       ign: "Umut",
       oauth2: "oauth_token_222",
       templates: [{ name: "Gold Farm", text: "Hosting Gold runs, AFK spot." }],
-      hostRating: 92,
-      customerRating: 88.5,
+      hostRating: 9.2,
+      customerRating: 8.85,
       hostThumbsUp: 85,
       hostThumbsDown: 8,
       customerThumbsUp: 20,
@@ -123,7 +119,7 @@ export const players = {
       oauth2: "oauth_token_333",
       templates: [],
       hostRating: 0,
-      customerRating: 100,
+      customerRating: 10,
       hostThumbsUp: 0,
       hostThumbsDown: 0,
       customerThumbsUp: 15,
@@ -134,8 +130,8 @@ export const players = {
       ign: "ToxicPlayer",
       oauth2: "oauth_token_444",
       templates: [],
-      hostRating: 45,
-      customerRating: 30,
+      hostRating: 4.5,
+      customerRating: 3.0,
       hostThumbsUp: 10,
       hostThumbsDown: 12,
       customerThumbsUp: 5,

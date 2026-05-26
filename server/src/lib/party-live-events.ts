@@ -5,6 +5,10 @@ export interface PartyLiveFilters {
   categoryId?: number;
   currencyId?: number;
   minHostRating?: number;
+  includeUnrated?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  q?: string;
 }
 
 export type PartyLiveEvent =
@@ -46,11 +50,26 @@ const matchesFilters = (
   ) {
     return false;
   }
-  if (
-    filters.minHostRating !== undefined &&
-    party.host.hostRating < filters.minHostRating
-  ) {
+  if (filters.minHostRating !== undefined) {
+    const meets = party.host.hostRating >= filters.minHostRating;
+    const unratedOk =
+      filters.includeUnrated === true && party.host.hostRating === 0;
+    if (!meets && !unratedOk) {
+      return false;
+    }
+  }
+  if (filters.minPrice !== undefined && party.cost < filters.minPrice) {
     return false;
+  }
+  if (filters.maxPrice !== undefined && party.cost > filters.maxPrice) {
+    return false;
+  }
+  if (filters.q !== undefined && filters.q.trim() !== "") {
+    const needle = filters.q.trim().toLowerCase();
+    const haystack = `${party.title} ${party.description ?? ""}`.toLowerCase();
+    if (!haystack.includes(needle)) {
+      return false;
+    }
   }
 
   return party.status === "Gathering";

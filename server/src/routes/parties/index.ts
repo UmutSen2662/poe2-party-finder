@@ -4,8 +4,8 @@ import {
   cancelParty,
   createParty,
   getPartyApplications,
-  getPartyById,
   getPartyRatingTargets,
+  getSearchPartyById,
   getWhisperMessage,
   searchParties,
   updatePartyStatus,
@@ -38,6 +38,10 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
       categoryId: t.Optional(t.Number()),
       currencyId: t.Optional(t.Number()),
       minHostRating: t.Optional(t.Number()),
+      includeUnrated: t.Optional(t.Boolean()),
+      minPrice: t.Optional(t.Number()),
+      maxPrice: t.Optional(t.Number()),
+      q: t.Optional(t.String()),
     }),
   })
   .get(
@@ -61,6 +65,10 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
         categoryId: t.Optional(t.Number()),
         currencyId: t.Optional(t.Number()),
         minHostRating: t.Optional(t.Number()),
+        includeUnrated: t.Optional(t.Boolean()),
+        minPrice: t.Optional(t.Number()),
+        maxPrice: t.Optional(t.Number()),
+        q: t.Optional(t.String()),
       }),
     },
   )
@@ -77,9 +85,8 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
     }),
     response: PartySchema,
   })
-  .get("/:id", ({ params }) => getPartyById(params.id), {
+  .get("/:id", ({ params }) => getSearchPartyById(params.id), {
     params: t.Object({ id: t.Number() }),
-    response: PartySchema,
   })
   .put(
     "/:id/status",

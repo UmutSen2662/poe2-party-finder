@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import {
   applies,
@@ -41,6 +41,7 @@ export interface PartyRow {
 }
 
 export interface SearchPartyRow extends PartyRow {
+  acceptedCount: number;
   host: {
     id: number;
     ign: string;
@@ -86,14 +87,17 @@ const toSearchPartyRow = ({
   league,
   category,
   currency,
+  acceptedCount,
 }: {
   party: PartyRecord;
   host: typeof players.$inferSelect;
   league: typeof leagues.$inferSelect;
   category: typeof categories.$inferSelect;
   currency: typeof currencies.$inferSelect;
+  acceptedCount: number;
 }): SearchPartyRow => ({
   ...toPartyRow(party),
+  acceptedCount,
   host: {
     id: host.id,
     ign: host.ign,
@@ -148,6 +152,10 @@ export const searchParties = async (
     categoryId?: number;
     currencyId?: number;
     minHostRating?: number;
+    includeUnrated?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    q?: string;
   } = {},
 ): Promise<SearchPartyRow[]> => {
   try {
@@ -163,8 +171,36 @@ export const searchParties = async (
       conditions.push(eq(parties.currencyId, filters.currencyId));
     }
     if (filters.minHostRating !== undefined) {
-      conditions.push(gte(players.hostRating, filters.minHostRating));
+      // A host passes the rating gate when they meet the threshold,
+      // or — if the client opted in — when they are unrated (rating = 0).
+      const meetsRating = gte(players.hostRating, filters.minHostRating);
+      if (filters.includeUnrated) {
+        const unratedCondition = or(meetsRating, eq(players.hostRating, 0));
+        if (unratedCondition) conditions.push(unratedCondition);
+      } else {
+        conditions.push(meetsRating);
+      }
     }
+    if (filters.minPrice !== undefined) {
+      conditions.push(gte(parties.cost, filters.minPrice));
+    }
+    if (filters.maxPrice !== undefined) {
+      conditions.push(lte(parties.cost, filters.maxPrice));
+    }
+    if (filters.q !== undefined && filters.q.trim() !== "") {
+      const pattern = `%${filters.q.trim()}%`;
+      const textMatch = or(
+        ilike(parties.title, pattern),
+        ilike(parties.description, pattern),
+      );
+      if (textMatch) conditions.push(textMatch);
+    }
+
+    const acceptedCountSql = sql<number>`(
+      select count(*)::int from ${applies}
+      where ${applies.partyId} = ${parties.id}
+        and ${applies.status} = 'accepted'
+    )`;
 
     const rows = await db
       .select({
@@ -173,6 +209,7 @@ export const searchParties = async (
         league: leagues,
         category: categories,
         currency: currencies,
+        acceptedCount: acceptedCountSql,
       })
       .from(parties)
       .innerJoin(players, eq(parties.hostId, players.id))
@@ -196,27 +233,46 @@ export const searchParties = async (
 export const getSearchPartyById = async (
   partyId: number,
 ): Promise<SearchPartyRow> => {
-  const [row] = await db
-    .select({
-      party: parties,
-      host: players,
-      league: leagues,
-      category: categories,
-      currency: currencies,
-    })
-    .from(parties)
-    .innerJoin(players, eq(parties.hostId, players.id))
-    .innerJoin(leagues, eq(parties.leagueId, leagues.id))
-    .innerJoin(categories, eq(parties.categoryId, categories.id))
-    .innerJoin(currencies, eq(parties.currencyId, currencies.id))
-    .where(eq(parties.id, partyId))
-    .limit(1);
+  try {
+    const acceptedCountSql = sql<number>`(
+      select count(*)::int from ${applies}
+      where ${applies.partyId} = ${parties.id}
+        and ${applies.status} = 'accepted'
+    )`;
 
-  if (!row) {
-    throw new NotFoundError("Party not found");
+    const [row] = await db
+      .select({
+        party: parties,
+        host: players,
+        league: leagues,
+        category: categories,
+        currency: currencies,
+        acceptedCount: acceptedCountSql,
+      })
+      .from(parties)
+      .innerJoin(players, eq(parties.hostId, players.id))
+      .innerJoin(leagues, eq(parties.leagueId, leagues.id))
+      .innerJoin(categories, eq(parties.categoryId, categories.id))
+      .innerJoin(currencies, eq(parties.currencyId, currencies.id))
+      .where(eq(parties.id, partyId))
+      .limit(1);
+
+    if (!row) {
+      throw new NotFoundError("Party not found");
+    }
+
+    return toSearchPartyRow(row);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    console.error("Database error in getSearchPartyById:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "getSearchPartyById",
+      context: { partyId },
+    });
+    throw new DatabaseError("Failed to fetch party");
   }
-
-  return toSearchPartyRow(row);
 };
 
 export const getPartyById = async (id: number): Promise<PartyRow> => {

@@ -23,30 +23,41 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { CurrencyBadge } from "./currency-badge";
+import { CurrencyBadge, type ServerCurrency } from "./currency-badge";
 
 export interface SearchFilterState {
   searchQuery: string;
   hostRating: number;
   includeUnrated: boolean;
   liveSearchEnabled: boolean;
-  category: string;
-  league: string;
+  categoryId: number | "all";
+  leagueId: number | null;
   minPrice: string;
   maxPrice: string;
-  currency: "divine" | "chaos";
+  currencyId: number | null;
+}
+
+export interface SearchFilterOption {
+  id: number;
+  displayName: string;
 }
 
 export interface SearchFiltersProps {
   state: SearchFilterState;
   onChange: (updates: Partial<SearchFilterState>) => void;
-  categories: { id: string | number; displayName: string }[];
+  onSearch: () => void;
+  categories: SearchFilterOption[];
+  leagues: SearchFilterOption[];
+  currencies: (ServerCurrency & { id: number })[];
 }
 
 export function SearchFilters({
   state,
   onChange,
+  onSearch,
   categories,
+  leagues,
+  currencies,
 }: SearchFiltersProps) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true);
 
@@ -85,19 +96,29 @@ export function SearchFilters({
           </div>
 
           <Select
-            value={state.league}
-            onValueChange={(val) => onChange({ league: val || "" })}
+            value={state.leagueId !== null ? state.leagueId.toString() : ""}
+            onValueChange={(val) =>
+              onChange({ leagueId: val ? Number(val) : null })
+            }
             disabled={disabled}
           >
             <SelectTrigger className="w-[180px] bg-card">
-              <SelectValue placeholder="Select League" />
+              {(() => {
+                const selected = leagues.find((l) => l.id === state.leagueId);
+                return selected ? (
+                  <span data-slot="select-value">{selected.displayName}</span>
+                ) : (
+                  <SelectValue placeholder="Select League" />
+                );
+              })()}
             </SelectTrigger>
             <SelectPositioner>
               <SelectContent>
-                <SelectItem value="Fate of the Vaal">
-                  Fate of the Vaal
-                </SelectItem>
-                <SelectItem value="Standard">Standard</SelectItem>
+                {leagues.map((league) => (
+                  <SelectItem key={league.id} value={league.id.toString()}>
+                    {league.displayName}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </SelectPositioner>
           </Select>
@@ -119,7 +140,11 @@ export function SearchFilters({
 
           {/* Center: Search Button */}
           <div className="flex flex-1 justify-center">
-            <Button className="px-8 max-w-sm" disabled={disabled}>
+            <Button
+              className="px-8 max-w-sm"
+              disabled={disabled}
+              onClick={onSearch}
+            >
               Search
             </Button>
           </div>
@@ -158,8 +183,16 @@ export function SearchFilters({
                 Service Category
               </div>
               <RadioGroup
-                value={state.category}
-                onValueChange={(val) => onChange({ category: val })}
+                value={
+                  state.categoryId === "all"
+                    ? "all"
+                    : state.categoryId.toString()
+                }
+                onValueChange={(val) =>
+                  onChange({
+                    categoryId: val === "all" ? "all" : Number(val),
+                  })
+                }
                 className="flex flex-wrap justify-start gap-2"
                 disabled={disabled}
               >
@@ -272,29 +305,43 @@ export function SearchFilters({
                     Currency
                   </FieldLabel>
                   <Select
-                    value={state.currency}
+                    value={
+                      state.currencyId !== null
+                        ? state.currencyId.toString()
+                        : "all"
+                    }
                     onValueChange={(val) =>
-                      onChange({ currency: val as "divine" | "chaos" })
+                      onChange({
+                        currencyId: val === "all" ? null : Number(val),
+                      })
                     }
                     disabled={disabled}
                   >
                     <SelectTrigger className="w-full bg-background">
-                      {state.currency ? (
-                        <span data-slot="select-value">
-                          <CurrencyBadge currency={state.currency} />
-                        </span>
-                      ) : (
-                        <SelectValue placeholder="Select Currency" />
-                      )}
+                      {(() => {
+                        const selected = currencies.find(
+                          (c) => c.id === state.currencyId,
+                        );
+                        return selected ? (
+                          <span data-slot="select-value">
+                            <CurrencyBadge currency={selected} />
+                          </span>
+                        ) : (
+                          <span data-slot="select-value">Any currency</span>
+                        );
+                      })()}
                     </SelectTrigger>
                     <SelectPositioner>
                       <SelectContent>
-                        <SelectItem value="divine">
-                          <CurrencyBadge currency="divine" />
-                        </SelectItem>
-                        <SelectItem value="chaos">
-                          <CurrencyBadge currency="chaos" />
-                        </SelectItem>
+                        <SelectItem value="all">Any currency</SelectItem>
+                        {currencies.map((currency) => (
+                          <SelectItem
+                            key={currency.id}
+                            value={currency.id.toString()}
+                          >
+                            <CurrencyBadge currency={currency} />
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </SelectPositioner>
                   </Select>
