@@ -1,4 +1,4 @@
-import { getTableName, is, Table } from "drizzle-orm";
+import { getTableName, is, sql, Table } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "./index";
 import * as schema from "./schema";
@@ -16,10 +16,27 @@ interface SeedBlock {
   rows: Record<string, unknown>[];
 }
 
+const seedOrder = [
+  "categories",
+  "leagues",
+  "currencies",
+  "admins",
+  "badges",
+  "players",
+  "badge_categories",
+  "earns",
+  "parties",
+  "applies",
+  "ratings",
+  "posts",
+];
+
 async function seed() {
   console.log("Seeding database...");
 
-  const seedBlocks = Object.values(seedExports) as SeedBlock[];
+  const seedBlocks = (Object.values(seedExports) as SeedBlock[]).sort(
+    (a, b) => seedOrder.indexOf(a.target) - seedOrder.indexOf(b.target),
+  );
 
   for (const { target } of seedBlocks) {
     if (!tableMap[target]) {
@@ -39,6 +56,19 @@ async function seed() {
         }
 
         await tx.insert(tableMap[target]).values(rows);
+
+        if (typeof rows[0]?.id === "number") {
+          await tx.execute(
+            sql.raw(`
+            SELECT setval(
+              pg_get_serial_sequence('"${target}"', 'id'),
+              (SELECT COALESCE(MAX(id), 1) FROM "${target}"),
+              true
+            )
+          `),
+          );
+        }
+
         console.log(`  Inserted ${rows.length} ${target}`);
       }
     });

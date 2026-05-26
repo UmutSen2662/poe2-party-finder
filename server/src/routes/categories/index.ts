@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { Elysia, t } from "elysia";
-import { NotFoundError, ValidationError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "../../lib/errors";
 import {
   createCategory,
   deleteCategory,

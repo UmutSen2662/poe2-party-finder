@@ -2,6 +2,12 @@
 
 This workspace contains the backend API and database schemas for the Path of Exile 2 Party Finder.
 
+## Current Demo Scope
+
+- Admin records and admin-managed reference data exist in the database/API, but the admin panel and admin authentication flow are intentionally out of scope for the current demo. They can be built later on top of the existing `admins`, `leagues`, `categories`, `currencies`, and `badges` tables.
+- GGG OAuth and character-roster validation are intentionally skipped for now. Demo sessions use predetermined seeded player accounts, and endpoints accept explicit player IDs until real authentication/session middleware is added.
+- Live search uses filter-scoped SSE only for newly created matching parties. Party updates/status changes remain normal request/response flows and are not broadcast.
+
 ## Database & Migrations Workflow
 
 We use **Drizzle ORM** to manage our PostgreSQL database.

@@ -42,6 +42,20 @@ export class DatabaseError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message: string = "Resource conflict") {
+    super("CONFLICT", message, 409);
+    this.name = "ConflictError";
+  }
+}
+
+export class ForbiddenError extends AppError {
+  constructor(message: string = "Forbidden") {
+    super("FORBIDDEN", message, 403);
+    this.name = "ForbiddenError";
+  }
+}
+
 export class InternalServerError extends AppError {
   constructor(message: string = "Internal server error") {
     super("INTERNAL_ERROR", message, 500);
