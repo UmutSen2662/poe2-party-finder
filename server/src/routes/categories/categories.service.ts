@@ -1,14 +1,55 @@
-import { sql } from "@/db/sql";
-import { sqlFile } from "@/db/sql-files";
-import type { Category } from "@/db/types";
+import { db } from "@/db";
+import { categories } from "@/db/schema";
 import { DatabaseError, NotFoundError } from "@/lib/errors";
+import { desc, eq } from "drizzle-orm";
 
 export type CategoryStatus = "Active" | "Inactive";
-export type CategoryRow = Omit<Category, "status"> & { status: CategoryStatus };
+
+type CategoryRecord = typeof categories.$inferSelect;
+
+export interface CategoryRow {
+  id: number;
+  name: string;
+  image: string | null;
+  status: CategoryStatus;
+}
+
+const toCategoryStatus = (
+  status: CategoryRecord["status"],
+): CategoryStatus => (status === "active" ? "Active" : "Inactive");
+
+const fromCategoryStatus = (
+  status: CategoryStatus,
+): CategoryRecord["status"] => (status === "Active" ? "active" : "inactive");
+
+const toCategoryRow = (category: CategoryRecord): CategoryRow => ({
+  id: category.id,
+  name: category.displayName,
+  image: category.imagePath,
+  status: toCategoryStatus(category.status),
+});
+
+const getCategoryRecord = async (
+  id: number,
+): Promise<CategoryRecord | undefined> => {
+  const [category] = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.id, id))
+    .limit(1);
+
+  return category;
+};
 
 export const getAllCategories = async (): Promise<CategoryRow[]> => {
   try {
-    return await sql.file<CategoryRow[]>(sqlFile("categories", "get-all.sql"));
+    const categoryRows = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.status, "active"))
+      .orderBy(desc(categories.id));
+
+    return categoryRows.map(toCategoryRow);
   } catch (error) {
     console.error("Database error in getAllCategories:", {
       error: error instanceof Error ? error.message : String(error),
@@ -24,12 +65,16 @@ export const createCategory = async (data: {
   status?: CategoryStatus;
 }): Promise<CategoryRow> => {
   try {
-    const [newCategory] = await sql.file<CategoryRow[]>(
-      sqlFile("categories", "create.sql"),
-      [data.name, data.image ?? null, data.status ?? "Active"],
-    );
+    const [newCategory] = await db
+      .insert(categories)
+      .values({
+        displayName: data.name,
+        imagePath: data.image ?? null,
+        status: fromCategoryStatus(data.status ?? "Active"),
+      })
+      .returning();
 
-    return newCategory;
+    return toCategoryRow(newCategory);
   } catch (error) {
     console.error("Database error in createCategory:", {
       error: error instanceof Error ? error.message : String(error),
@@ -49,15 +94,34 @@ export const updateCategory = async (
   },
 ): Promise<CategoryRow> => {
   try {
-    const [updatedCategory] = await sql.file<CategoryRow[]>(
-      sqlFile("categories", "update.sql"),
-      [id, data.name ?? null, data.image ?? null, data.status ?? null],
-    );
+    const updateData: Partial<typeof categories.$inferInsert> = {};
+
+    if (data.name !== undefined) {
+      updateData.displayName = data.name;
+    }
+
+    if (data.image !== undefined) {
+      updateData.imagePath = data.image;
+    }
+
+    if (data.status !== undefined) {
+      updateData.status = fromCategoryStatus(data.status);
+    }
+
+    const [updatedCategory] =
+      Object.keys(updateData).length === 0
+        ? [await getCategoryRecord(id)]
+        : await db
+            .update(categories)
+            .set(updateData)
+            .where(eq(categories.id, id))
+            .returning();
 
     if (!updatedCategory) {
       throw new NotFoundError("Category not found");
     }
-    return updatedCategory;
+
+    return toCategoryRow(updatedCategory);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
@@ -74,15 +138,17 @@ export const updateCategory = async (
 
 export const deleteCategory = async (id: number): Promise<CategoryRow> => {
   try {
-    const [deletedCategory] = await sql.file<CategoryRow[]>(
-      sqlFile("categories", "deactivate.sql"),
-      [id],
-    );
+    const [deletedCategory] = await db
+      .update(categories)
+      .set({ status: "inactive" })
+      .where(eq(categories.id, id))
+      .returning();
 
     if (!deletedCategory) {
       throw new NotFoundError("Category not found");
     }
-    return deletedCategory;
+
+    return toCategoryRow(deletedCategory);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
@@ -98,15 +164,17 @@ export const deleteCategory = async (id: number): Promise<CategoryRow> => {
 
 export const getCategoryById = async (id: number): Promise<CategoryRow> => {
   try {
-    const [category] = await sql.file<CategoryRow[]>(
-      sqlFile("categories", "get-by-id.sql"),
-      [id],
-    );
+    const [category] = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, id))
+      .limit(1);
 
-    if (!category) {
+    if (!category || category.status !== "active") {
       throw new NotFoundError("Category not found");
     }
-    return category;
+
+    return toCategoryRow(category);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
