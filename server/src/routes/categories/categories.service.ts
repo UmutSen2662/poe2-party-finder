@@ -1,7 +1,8 @@
-import { db } from "@/db";
-import { categories } from "@/db/schema";
-import { DatabaseError, NotFoundError } from "@/lib/errors";
 import { desc, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { categories } from "../../db/schema";
+import { DatabaseError, NotFoundError } from "../../lib/errors";
+import { fromPublicStatus, toPublicStatus } from "../../lib/status";
 
 export type CategoryStatus = "Active" | "Inactive";
 
@@ -14,13 +15,11 @@ export interface CategoryRow {
   status: CategoryStatus;
 }
 
-const toCategoryStatus = (
-  status: CategoryRecord["status"],
-): CategoryStatus => (status === "active" ? "Active" : "Inactive");
+const toCategoryStatus = (status: CategoryRecord["status"]): CategoryStatus =>
+  toPublicStatus(status);
 
-const fromCategoryStatus = (
-  status: CategoryStatus,
-): CategoryRecord["status"] => (status === "Active" ? "active" : "inactive");
+const fromCategoryStatus = (status: CategoryStatus): CategoryRecord["status"] =>
+  fromPublicStatus(status);
 
 const toCategoryRow = (category: CategoryRecord): CategoryRow => ({
   id: category.id,
