@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { adminsRoutes } from "./admins";
 import { applicationsRoutes } from "./applications";
+import { authRoutes } from "./auth";
 import { badgesRoutes } from "./badges";
 import { categoriesRoutes } from "./categories";
 import { currenciesRoutes } from "./currencies";
@@ -11,6 +12,7 @@ import { playersRoutes } from "./players";
 import { ratingsRoutes } from "./ratings";
 
 export const api = new Elysia()
+  .use(authRoutes)
   .use(categoriesRoutes)
   .use(leaguesRoutes)
   .use(currenciesRoutes)

@@ -3,7 +3,9 @@ import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import {
   AppError,
+  ConflictError,
   createErrorResponse,
+  ForbiddenError,
   InternalServerError,
   NotFoundError,
   ValidationError,
@@ -44,7 +46,11 @@ const app = new Elysia()
     }
 
     // Handle generic errors
-    console.error("Unhandled error:", error);
+    console.error("Unhandled error:", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      code,
+    });
     set.status = 500;
     return createErrorResponse(
       new InternalServerError("Internal server error"),

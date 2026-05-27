@@ -1,6 +1,6 @@
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { FlaskConical, HomeIcon, Settings, Users } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/auth-context";
 
 interface AppSidebarProps {
   activeTab: string;
@@ -22,6 +23,8 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
+  const { user, loading } = useAuth();
+
   // Navigation Hotkeys
   useHotkey("Mod+1", () => setActiveTab("home"));
   useHotkey("Mod+2", () => setActiveTab("lobby"));
@@ -136,11 +139,16 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src="https://github.com/shadcn.png" alt="Umut" />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {loading
+                    ? "..."
+                    : user?.ign?.substring(0, 2).toUpperCase() || "CN"}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Umut</span>
+                <span className="truncate font-semibold">
+                  {loading ? "Loading..." : user?.ign || "User"}
+                </span>
               </div>
               <div>
                 <Settings size={20} className="mr-1" />

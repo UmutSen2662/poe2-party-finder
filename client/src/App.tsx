@@ -1,8 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Activity, Suspense, useState } from "react";
+import { AuthProvider, useAuth } from "./contexts/auth-context";
 import { Layout } from "./layout";
 import { queryClient } from "./lib/queryClient";
 import { LobbyPage } from "./pages/lobby-page";
+import { LoginPage } from "./pages/login-page";
 import { SearchPage } from "./pages/search-page";
 import { SettingsPage } from "./pages/settings-page";
 import { TestPage } from "./pages/test-page";
@@ -48,36 +50,57 @@ function TabPage({
   );
 }
 
-export default function App() {
+function AppContent() {
+  const { loading, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("home");
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12 text-muted-foreground w-full h-full">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return (
+    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center p-12 text-muted-foreground w-full h-full">
+            Loading services...
+          </div>
+        }
+      >
+        <TabPage currentTab={activeTab} tabId="home" mode="hide">
+          <SearchPage />
+        </TabPage>
+
+        <TabPage currentTab={activeTab} tabId="lobby" mode="hide">
+          <LobbyPage />
+        </TabPage>
+
+        <TabPage currentTab={activeTab} tabId="test" mode="hide">
+          <TestPage />
+        </TabPage>
+
+        <TabPage currentTab={activeTab} tabId="settings" mode="unmount">
+          <SettingsPage />
+        </TabPage>
+      </Suspense>
+    </Layout>
+  );
+}
+
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center p-12 text-muted-foreground w-full h-full">
-              Loading services...
-            </div>
-          }
-        >
-          <TabPage currentTab={activeTab} tabId="home" mode="hide">
-            <SearchPage />
-          </TabPage>
-
-          <TabPage currentTab={activeTab} tabId="lobby" mode="hide">
-            <LobbyPage />
-          </TabPage>
-
-          <TabPage currentTab={activeTab} tabId="test" mode="hide">
-            <TestPage />
-          </TabPage>
-
-          <TabPage currentTab={activeTab} tabId="settings" mode="unmount">
-            <SettingsPage />
-          </TabPage>
-        </Suspense>
-      </Layout>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

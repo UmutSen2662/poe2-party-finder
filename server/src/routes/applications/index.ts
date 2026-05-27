@@ -3,6 +3,7 @@ import {
   createApplication,
   deleteApplication,
   getPlayerApplicationStatus,
+  getPlayerApplications,
   updateApplicationStatus,
 } from "./applications.service";
 
@@ -21,6 +22,12 @@ const ApplicationSchema = t.Object({
 });
 
 export const applicationsRoutes = new Elysia({ prefix: "/applications" })
+  .get("/", ({ query }) => getPlayerApplications(query.playerId), {
+    query: t.Object({
+      playerId: t.Number(),
+    }),
+    response: t.Array(ApplicationSchema),
+  })
   .post("/", ({ body }) => createApplication(body), {
     body: t.Object({
       playerId: t.Number(),

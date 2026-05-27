@@ -39,6 +39,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/auth-context";
 import type {
   Applicant,
   ApplicationStatus,
@@ -50,6 +51,9 @@ import { statusBadgeClass } from "./utils";
 
 interface HostLobbyViewProps {
   form: PartyFormState;
+  partyId: number;
+  partyTitle: string;
+  partyDescription?: string;
   partyStatus: PartyStatus;
   applicants: Applicant[];
   onStartParty: (partyId: number) => void;
@@ -123,6 +127,9 @@ function ConfirmAction({
 
 export function HostLobbyView({
   form,
+  partyId,
+  partyTitle,
+  partyDescription,
   partyStatus,
   applicants,
   onStartParty,
@@ -131,6 +138,7 @@ export function HostLobbyView({
   onUpdateApplicantStatus,
   onSubmitRating,
 }: HostLobbyViewProps) {
+  const { user } = useAuth();
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [ratings, setRatings] = useState<Record<string, RatingVote>>({});
   const acceptedCount = applicants.filter(
@@ -142,27 +150,27 @@ export function HostLobbyView({
   );
 
   const handleStartParty = () => {
-    onStartParty(1); // Mock party ID - should come from server state
+    onStartParty(partyId);
   };
 
   const handleEndParty = () => {
-    onEndParty(1); // Mock party ID - should come from server state
+    onEndParty(partyId);
     setRatingDialogOpen(true);
   };
 
   const handleCancelParty = () => {
-    onCancelParty(1); // Mock party ID - should come from server state
+    onCancelParty(partyId);
   };
 
   const handleUpdateApplicantStatus = (
     applicantId: string,
     status: ApplicationStatus,
   ) => {
-    onUpdateApplicantStatus(1, Number(applicantId), status); // Mock party ID
+    onUpdateApplicantStatus(partyId, Number(applicantId), status);
   };
 
   const handleSubmitRating = (applicantId: string, value: 1 | -1) => {
-    onSubmitRating(1, Number(applicantId), 1, value); // Mock IDs
+    onSubmitRating(user?.id || 0, Number(applicantId), partyId, value);
   };
 
   return (
@@ -196,11 +204,10 @@ export function HostLobbyView({
             <div className="flex flex-col gap-3 rounded-xl border bg-[#111] p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <h2 className="truncate font-semibold text-white">
-                  {form.title}
+                  {partyTitle}
                 </h2>
                 <p className="mt-1 text-sm text-zinc-400">
-                  Start locks search visibility. End opens post-run ratings.
-                  Cancel removes the lobby before the run.
+                  {partyDescription || "No description"}
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">

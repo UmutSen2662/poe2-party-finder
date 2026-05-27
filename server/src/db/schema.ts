@@ -60,7 +60,9 @@ export const posts = pgTable("posts", {
 export const players = pgTable("players", {
   id: serial("id").primaryKey(),
   ign: varchar("ign", { length: 255 }).notNull(),
-  oauth2: text("oauth2").notNull(),
+  oauth2: text("oauth2"),
+  email: varchar("email", { length: 255 }).unique(),
+  password: varchar("password", { length: 255 }),
   templates: jsonb("templates")
     .$type<ServiceTemplate[]>()
     .default(sql`'[]'::jsonb`)

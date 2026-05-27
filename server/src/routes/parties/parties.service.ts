@@ -156,11 +156,15 @@ export const searchParties = async (
     minPrice?: number;
     maxPrice?: number;
     q?: string;
+    excludeHostId?: number;
   } = {},
 ): Promise<SearchPartyRow[]> => {
   try {
     const conditions = [eq(parties.status, "gathering")];
 
+    if (filters.excludeHostId !== undefined) {
+      conditions.push(sql`${parties.hostId} != ${filters.excludeHostId}`);
+    }
     if (filters.leagueId !== undefined) {
       conditions.push(eq(parties.leagueId, filters.leagueId));
     }
@@ -362,7 +366,9 @@ export const updatePartyStatus = async (
   hostId: number,
 ): Promise<PartyRow> => {
   try {
+    console.log("updatePartyStatus called:", { id, status, hostId });
     const existingParty = await getPartyRecord(id);
+    console.log("Existing party:", existingParty);
     assertPartyHost(existingParty, hostId);
 
     const [party] = await db
@@ -377,6 +383,7 @@ export const updatePartyStatus = async (
 
     return toPartyRow(party);
   } catch (error) {
+    console.error("Error in updatePartyStatus:", error);
     if (error instanceof NotFoundError || error instanceof ForbiddenError) {
       throw error;
     }
@@ -577,5 +584,31 @@ export const getWhisperMessage = async (
       context: { partyId, customerId },
     });
     throw new DatabaseError("Failed to create whisper message");
+  }
+};
+
+export const getActivePartyForHost = async (
+  hostId: number,
+): Promise<PartyRow | null> => {
+  try {
+    const [party] = await db
+      .select()
+      .from(parties)
+      .where(
+        and(
+          eq(parties.hostId, hostId),
+          sql`${parties.status} in ('gathering', 'started')`,
+        ),
+      )
+      .limit(1);
+
+    return party ? toPartyRow(party) : null;
+  } catch (error) {
+    console.error("Database error in getActivePartyForHost:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "getActivePartyForHost",
+      context: { hostId },
+    });
+    throw new DatabaseError("Failed to check active party");
   }
 };

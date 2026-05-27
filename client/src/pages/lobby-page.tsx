@@ -16,10 +16,8 @@ import type {
 } from "@/components/lobby/types";
 import { statusBadgeClass } from "@/components/lobby/utils";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/auth-context";
 import { api, assetUrl } from "@/lib/eden";
-
-// Mock player ID - this should come from auth/session in production
-const MOCK_PLAYER_ID = 1;
 
 const categoriesQuery = queryOptions({
   queryKey: ["categories"],
@@ -50,34 +48,37 @@ const currenciesQuery = queryOptions({
   },
 });
 
-const lobbyStateQuery = queryOptions({
-  queryKey: ["lobby", "state"],
-  queryFn: async () => {
-    const { data, error } = await api.lobby.state.get({
-      $query: { playerId: MOCK_PLAYER_ID },
-    });
-    if (error) throw error;
-    return data;
-  },
-});
+const lobbyStateQuery = (playerId: number) =>
+  queryOptions({
+    queryKey: ["lobby", "state"],
+    queryFn: async () => {
+      const { data, error } = await api.lobby.state.get({
+        $query: { playerId },
+      });
+      if (error) throw error;
+      return data;
+    },
+  });
 
-const templatesQuery = queryOptions({
-  queryKey: ["lobby", "templates"],
-  queryFn: async () => {
-    const { data, error } = await api.lobby.templates.get({
-      $query: { playerId: MOCK_PLAYER_ID },
-    });
-    if (error) throw error;
-    return data;
-  },
-});
+const templatesQuery = (playerId: number) =>
+  queryOptions({
+    queryKey: ["lobby", "templates", playerId],
+    queryFn: async () => {
+      const { data, error } = await api.lobby.templates.get({
+        $query: { playerId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!playerId,
+  });
 
-function applicantsQuery(partyId: number) {
+function applicantsQuery(partyId: number, hostId: number) {
   return queryOptions({
     queryKey: ["lobby", "applicants", partyId],
     queryFn: async () => {
       const { data, error } = await api.parties[partyId].applications.get({
-        $query: { hostId: MOCK_PLAYER_ID },
+        $query: { hostId },
       });
       if (error) throw error;
       return data;
@@ -87,6 +88,7 @@ function applicantsQuery(partyId: number) {
 
 export function LobbyPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [form, setForm] = useState<PartyFormState>({
     title: "",
     description: "",
@@ -103,16 +105,19 @@ export function LobbyPage() {
   const { data: currencies } = useSuspenseQuery(currenciesQuery);
 
   // Fetch lobby state
-  const { data: lobbyState } = useQuery(lobbyStateQuery);
+  const { data: lobbyState } = useQuery({
+    ...lobbyStateQuery(user?.id || 0),
+    enabled: !!user?.id,
+  });
 
   // Fetch templates
-  const { data: serverTemplates } = useQuery(templatesQuery);
+  const { data: serverTemplates } = useQuery(templatesQuery(user?.id || 0));
 
   // Fetch applicants when in host mode
   const partyId = lobbyState?.kind === "host" ? lobbyState.party.id : undefined;
   const { data: applicants } = useQuery({
-    ...applicantsQuery(partyId || 0),
-    enabled: partyId !== undefined,
+    ...applicantsQuery(partyId || 0, user?.id || 0),
+    enabled: partyId !== undefined && !!user?.id,
   });
 
   // Normalize data for components
@@ -185,9 +190,10 @@ export function LobbyPage() {
       categoryId: number;
       currencyId: number;
     }) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.parties.post({
         ...payload,
-        hostId: MOCK_PLAYER_ID,
+        hostId: user.id,
       });
       if (error) throw error;
       return data;
@@ -206,9 +212,10 @@ export function LobbyPage() {
       partyId: number;
       status: "Gathering" | "Started" | "Ended";
     }) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.parties[partyId].status.put({
         status,
-        hostId: MOCK_PLAYER_ID,
+        hostId: user.id,
       });
       if (error) throw error;
       return data;
@@ -221,8 +228,9 @@ export function LobbyPage() {
 
   const cancelPartyMutation = useMutation({
     mutationFn: async (partyId: number) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.parties[partyId].delete({
-        $query: { hostId: MOCK_PLAYER_ID },
+        $query: { hostId: user.id },
       });
       if (error) throw error;
       return data;
@@ -243,11 +251,12 @@ export function LobbyPage() {
       playerId: number;
       status: "Pending" | "Accepted" | "Rejected" | "Kicked";
     }) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.applications[partyId][
         playerId
       ].status.put({
         status,
-        hostId: MOCK_PLAYER_ID,
+        hostId: user.id,
       });
       if (error) throw error;
       return data;
@@ -268,8 +277,9 @@ export function LobbyPage() {
       partyId: number;
       playerId: number;
     }) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.applications[partyId][playerId].delete({
-        $query: { requesterPlayerId: MOCK_PLAYER_ID },
+        $query: { requesterPlayerId: user.id },
       });
       if (error) throw error;
       return data;
@@ -307,8 +317,9 @@ export function LobbyPage() {
 
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateIndex: number) => {
+      if (!user?.id) throw new Error("User not authenticated");
       const { data, error } = await api.lobby.templates[templateIndex].delete({
-        $query: { playerId: MOCK_PLAYER_ID },
+        $query: { playerId: user.id },
       });
       if (error) throw error;
       return data;
@@ -334,8 +345,9 @@ export function LobbyPage() {
         : "Host View";
 
   const saveTemplate = async () => {
+    if (!user?.id) return;
     const { error } = await api.lobby.templates.post({
-      $query: { playerId: MOCK_PLAYER_ID },
+      $query: { playerId: user.id },
       name: form.title || "Untitled Template",
       text: form.description,
       title: form.title,
@@ -352,7 +364,7 @@ export function LobbyPage() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 p-6 mx-auto max-w-6xl">
+    <div className="flex w-full flex-col gap-6 p-6 mx-auto max-w-4xl">
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Lobby</h1>
         <p className="mt-2 text-muted-foreground">
@@ -386,9 +398,54 @@ export function LobbyPage() {
       {activeView === "customer" && (
         <CustomerLobbyView
           form={form}
+          partyId={partyId || 0}
+          partyTitle={
+            lobbyState?.kind === "customer"
+              ? lobbyState.application.party.title
+              : ""
+          }
+          partyDescription={
+            lobbyState?.kind === "customer"
+              ? (lobbyState.application.party.description ?? undefined)
+              : undefined
+          }
+          categoryDisplayName={
+            lobbyState?.kind === "customer"
+              ? lobbyState.application.party.category.displayName
+              : ""
+          }
+          leagueName={
+            lobbyState?.kind === "customer"
+              ? lobbyState.application.party.league.name
+              : ""
+          }
+          hostIgn={
+            lobbyState?.kind === "customer"
+              ? (lobbyState.application.party.host?.ign ?? "")
+              : ""
+          }
+          hostRating={
+            lobbyState?.kind === "customer"
+              ? (lobbyState.application.party.host?.hostRating ?? 0)
+              : 0
+          }
+          cost={
+            lobbyState?.kind === "customer"
+              ? lobbyState.application.party.cost
+              : 0
+          }
+          currencyName={
+            lobbyState?.kind === "customer"
+              ? lobbyState.application.party.currency.name
+              : ""
+          }
+          currencyIcon={
+            lobbyState?.kind === "customer"
+              ? assetUrl(lobbyState.application.party.currency.icon)
+              : undefined
+          }
           applicationStatus={applicationStatus}
           partyStatus={partyStatus}
-          applicants={normalizedApplicants}
           onCancelApplication={(partyId, playerId) =>
             cancelApplicationMutation.mutate({ partyId, playerId })
           }
@@ -397,6 +454,13 @@ export function LobbyPage() {
       {activeView === "host" && (
         <HostLobbyView
           form={form}
+          partyId={partyId || 0}
+          partyTitle={lobbyState?.kind === "host" ? lobbyState.party.title : ""}
+          partyDescription={
+            lobbyState?.kind === "host"
+              ? (lobbyState.party.description ?? undefined)
+              : undefined
+          }
           partyStatus={partyStatus}
           applicants={normalizedApplicants}
           onStartParty={(partyId) =>

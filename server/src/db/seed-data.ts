@@ -90,6 +90,8 @@ export const players = {
     {
       id: 1,
       ign: "Emre",
+      email: "emre@example.com",
+      password: "$2b$10$DS6Nza/7LA5EOLfL51DNLeeV3iX.bxk82.3HiIB9aGAKk1/eVHhgu",
       oauth2: "oauth_token_111",
       templates: [
         { name: "Fast Olroth", text: "WTS Olroth Kill, fast and safe." },
@@ -104,6 +106,8 @@ export const players = {
     {
       id: 2,
       ign: "Umut",
+      email: "umut@example.com",
+      password: "$2b$10$BwRZbm12YX3lMC91Bf7bc.numCt9LWv4eCrLn88DzGCnRI2SXBKN6",
       oauth2: "oauth_token_222",
       templates: [{ name: "Gold Farm", text: "Hosting Gold runs, AFK spot." }],
       hostRating: 9.2,
@@ -116,6 +120,8 @@ export const players = {
     {
       id: 3,
       ign: "NoobPlayer",
+      email: "noob@example.com",
+      password: "$2b$10$2AcsXHvwc1jmqBEa1L7c0O2PqsIbsPfUzH9i.sC4k8ncCQjzsKEyu",
       oauth2: "oauth_token_333",
       templates: [],
       hostRating: 0,
@@ -128,6 +134,8 @@ export const players = {
     {
       id: 4,
       ign: "ToxicPlayer",
+      email: "toxic@example.com",
+      password: "$2b$10$8Hr9OAph4jtlqpZth0dgje7Ag4y2DyU0i8.C1/fGDWLyYeJeEUDtm",
       oauth2: "oauth_token_444",
       templates: [],
       hostRating: 4.5,
@@ -156,7 +164,7 @@ export const parties = {
       title: "Olroth Kill - EU Server",
       description: "Bring your own entry, stay dead if you die.",
       capacity: 5,
-      status: "gathering",
+      status: "ended",
       cost: 2,
       hostId: 1,
       leagueId: 3,
@@ -168,7 +176,7 @@ export const parties = {
       title: "Gold Farm - 5 runs",
       description: "Resetting fast, stay AFK.",
       capacity: 5,
-      status: "started",
+      status: "ended",
       cost: 50,
       hostId: 2,
       leagueId: 1,

@@ -447,6 +447,7 @@ export function CreatePartyView({
           </p>
         </div>
         <PartyCard
+          title={form.title || "Untitled Party"}
           ign="HostCarry"
           rating={9.5}
           category={selectedCategory?.name ?? "Unknown Category"}

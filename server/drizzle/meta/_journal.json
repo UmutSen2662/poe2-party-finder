@@ -29,6 +29,13 @@
       "when": 1779796091134,
       "tag": "0003_young_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779883486260,
+      "tag": "0004_bitter_warhawk",
+      "breakpoints": true
     }
   ]
 }

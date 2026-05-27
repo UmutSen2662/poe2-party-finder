@@ -1,5 +1,6 @@
 import {
   queryOptions,
+  useMutation,
   useQuery,
   useQueryClient,
   useSuspenseQuery,
@@ -10,6 +11,7 @@ import {
   type SearchFilterState,
   SearchFilters,
 } from "@/components/search-filters";
+import { useAuth } from "@/contexts/auth-context";
 import { API_BASE_URL, api, assetUrl } from "@/lib/eden";
 
 const categoriesQuery = queryOptions({
@@ -50,6 +52,7 @@ interface PartiesSearchParams {
   minPrice?: number;
   maxPrice?: number;
   q?: string;
+  excludeHostId?: number;
 }
 
 function partiesQuery(params: PartiesSearchParams) {
@@ -79,9 +82,51 @@ function buildLiveSearchUrl(params: PartiesSearchParams): string {
 
 export function SearchPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: leagues } = useSuspenseQuery(leaguesQuery);
   const { data: currencies } = useSuspenseQuery(currenciesQuery);
+
+  const { data: activeParty } = useQuery({
+    queryKey: ["active-party", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await api.parties.active[user.id].get();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async (partyId: number) => {
+      if (!user?.id) throw new Error("User not authenticated");
+      const { data, error } = await api.applications.post({
+        playerId: user.id,
+        partyId,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["active-party", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+    },
+  });
+
+  const { data: myApplications } = useQuery({
+    queryKey: ["my-applications"],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await api.applications.get({
+        $query: { playerId: user.id },
+      });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const filterCategories = categories.map((category) => ({
     id: category.id,
@@ -147,6 +192,7 @@ export function SearchPage() {
     if (!Number.isNaN(maxPrice)) params.maxPrice = maxPrice;
     const q = state.searchQuery.trim();
     if (q !== "") params.q = q;
+    if (user?.id) params.excludeHostId = user.id;
     return params;
   };
 
@@ -275,6 +321,7 @@ export function SearchPage() {
           parties.map((party) => (
             <PartyCard
               key={party.id}
+              title={party.title}
               ign={party.host.ign}
               rating={party.host.hostRating}
               category={party.category.name}
@@ -289,9 +336,12 @@ export function SearchPage() {
               maxQueue={party.capacity}
               createdAt={party.createdAt}
               lastRefreshedAt={refreshedAt[party.id]}
-              isDisabled={false}
+              isDisabled={!!activeParty}
+              hasApplied={myApplications?.some(
+                (app) => app.partyId === party.id,
+              )}
               onRefresh={() => handleRefreshParty(party.id)}
-              onApply={() => console.log("Apply clicked", party.id)}
+              onApply={() => applyMutation.mutate(party.id)}
             />
           ))
         )}

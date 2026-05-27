@@ -113,6 +113,7 @@ export type {
 
 export async function getLobbyState(playerId: number): Promise<LobbyState> {
   try {
+    console.log("getLobbyState called for playerId:", playerId);
     // Check if player is hosting an active party
     const hostedParty = await db
       .select({
@@ -154,6 +155,8 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
       .leftJoin(players, eq(parties.hostId, players.id))
       .where(and(eq(parties.hostId, playerId), eq(parties.status, "gathering")))
       .limit(1);
+
+    console.log("Hosted party query result:", hostedParty);
 
     if (hostedParty.length > 0) {
       const party = hostedParty[0];

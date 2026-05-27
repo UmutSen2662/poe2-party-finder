@@ -18,6 +18,7 @@ import {
 const STALE_THRESHOLD_MS = 3 * 60 * 1000;
 
 interface PartyCardProps {
+  title: string;
   ign: string;
   rating: number;
   category: string;
@@ -36,11 +37,13 @@ interface PartyCardProps {
    */
   lastRefreshedAt?: number;
   isDisabled?: boolean;
+  hasApplied?: boolean;
   onRefresh?: () => void;
   onApply?: () => void;
 }
 
 export function PartyCard({
+  title,
   ign,
   rating,
   category,
@@ -53,6 +56,7 @@ export function PartyCard({
   createdAt,
   lastRefreshedAt,
   isDisabled = false,
+  hasApplied = false,
   onRefresh,
   onApply,
 }: PartyCardProps) {
@@ -169,11 +173,21 @@ export function PartyCard({
         />
 
         {/* Middle Column - Details */}
-        <div className="flex-1 min-w-0 h-full flex flex-col justify-center">
-          {/* Category Pill */}
-          <Badge className="text-[10px] font-bold uppercase tracking-wider w-fit mb-2 bg-white/10 text-white">
-            {category}
-          </Badge>
+        <div className="flex-1 min-w-0 h-full flex flex-col justify-center overflow-hidden">
+          {/* Category and Title Row */}
+          <div className="flex items-center gap-2 mb-2 w-full min-w-0">
+            <Badge className="text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white shrink-0">
+              {category}
+            </Badge>
+            <h3
+              className={cn(
+                "font-semibold text-base truncate overflow-hidden flex-1 min-w-0 w-0",
+                isDisabled ? "text-white/60" : "text-white",
+              )}
+            >
+              {title}
+            </h3>
+          </div>
 
           {/* Description */}
           <p
@@ -233,15 +247,19 @@ export function PartyCard({
           {/* Action Button */}
           <Button
             className="w-full"
-            disabled={isDisabled}
+            disabled={isDisabled || hasApplied}
             onClick={onApply}
-            variant={isDisabled ? "outline" : "default"}
+            variant={
+              isDisabled ? "outline" : hasApplied ? "secondary" : "default"
+            }
           >
             {isDisabled ? (
               <>
                 <Lock className="size-4" />
                 Lobby Started
               </>
+            ) : hasApplied ? (
+              "Applied"
             ) : (
               "Apply"
             )}

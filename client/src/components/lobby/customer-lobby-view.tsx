@@ -1,61 +1,50 @@
-import {
-  Check,
-  Copy,
-  ShieldCheck,
-  Star,
-  ThumbsDown,
-  ThumbsUp,
-  Users,
-} from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, Check, Clock, Copy, Shield, Star, X } from "lucide-react";
 import { CurrencyBadge } from "@/components/currency-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import type {
-  Applicant,
-  ApplicationStatus,
-  PartyFormState,
-  PartyStatus,
-  RatingVote,
-} from "./types";
-import { statusBadgeClass } from "./utils";
+import { useAuth } from "@/contexts/auth-context";
+import type { ApplicationStatus, PartyFormState, PartyStatus } from "./types";
 
 interface CustomerLobbyViewProps {
   form: PartyFormState;
+  partyId: number;
+  partyTitle: string;
+  partyDescription?: string;
+  categoryDisplayName: string;
+  leagueName: string;
+  hostIgn: string;
+  hostRating: number;
+  cost: number;
+  currencyName: string;
+  currencyIcon?: string | null;
   applicationStatus: ApplicationStatus;
   partyStatus: PartyStatus;
-  applicants: Applicant[];
   onCancelApplication: (partyId: number, playerId: number) => void;
 }
 
 export function CustomerLobbyView({
   form,
+  partyId,
+  partyTitle,
+  partyDescription,
+  categoryDisplayName,
+  leagueName,
+  hostIgn,
+  hostRating: hostRatingProp,
+  cost,
+  currencyName,
+  currencyIcon,
   applicationStatus,
   partyStatus,
-  applicants,
   onCancelApplication,
 }: CustomerLobbyViewProps) {
-  const [hostRating, setHostRating] = useState<RatingVote>(null);
-  const categoryName = "Category Name"; // Will come from server data
-  const leagueName = "League Name"; // Will come from server data
+  const { user } = useAuth();
   const canCopyWhisper = applicationStatus === "Accepted";
-  const canCancel = partyStatus === "Gathering";
-  const visibleParticipants = applicants.filter(
-    (applicant) =>
-      applicant.status === "Accepted" || applicant.status === "Kicked",
-  );
-  const whisperText = `@HostCarry Hi, I was accepted for your ${form.title} service in ${leagueName}. Fee: ${form.cost} ${form.currencyId}.`;
+  const canCancel =
+    partyStatus === "Gathering" && applicationStatus === "Pending";
+  const whisperText = `@${hostIgn} Hi, I was accepted for your ${partyTitle} service in ${leagueName}. Fee: ${cost} ${currencyName}.`;
 
   const copyWhisper = () => {
     if (!canCopyWhisper) return;
@@ -63,195 +52,148 @@ export function CustomerLobbyView({
   };
 
   const handleCancelApplication = () => {
-    // Mock party and player IDs - these should come from server state
-    onCancelApplication(1, 1);
+    onCancelApplication(partyId, user?.id || 0);
   };
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <ShieldCheck className="size-5" />
-            Active Application
-          </CardTitle>
-          <CardDescription>
-            Read-only dashboard for the party you applied to.
-          </CardDescription>
-          <CardAction>
-            <Badge className={statusBadgeClass(applicationStatus)}>
-              {applicationStatus}
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="rounded-xl border bg-[#111] p-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                <Badge className="bg-orange-500/20 text-orange-300">
-                  {categoryName}
-                </Badge>
-                <h2 className="text-2xl font-bold text-white">{form.title}</h2>
-                <p className="text-sm text-zinc-400">
-                  Hosted by HostCarry in {leagueName}
-                </p>
-              </div>
-              <div className="rounded-lg border border-white/10 bg-black/30 px-4 py-3 text-right">
-                <div className="text-xs text-zinc-400">Cost</div>
-                <div className="mt-1 flex items-center gap-2 text-lg font-semibold text-white">
-                  {form.cost}
-                  <CurrencyBadge
-                    currency={
-                      form.currencyId === 1
-                        ? "divine"
-                        : form.currencyId === 2
-                          ? "chaos"
-                          : "divine"
-                    }
-                    showLabel={false}
-                  />
-                </div>
-              </div>
+  // Rejected/Kicked fallback state
+  if (applicationStatus === "Rejected" || applicationStatus === "Kicked") {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full border-red-500/30 bg-red-950/20 p-8">
+          <div className="flex flex-col items-center gap-6 text-center">
+            <div className="rounded-full bg-red-500/20 p-4">
+              <AlertCircle className="size-8 text-red-400" />
             </div>
-            <Separator className="my-5 bg-white/10" />
-            <p className="whitespace-pre-line text-sm leading-6 text-zinc-200">
-              {form.description}
-            </p>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-4">
-            {["Pending", "Accepted", "Rejected", "Kicked"].map(
-              (status, index) => {
-                const statuses = ["Pending", "Accepted", "Rejected", "Kicked"];
-                const activeIndex = statuses.indexOf(applicationStatus);
-                const isActive = status === applicationStatus;
-                const isPast =
-                  index < activeIndex &&
-                  applicationStatus !== "Rejected" &&
-                  applicationStatus !== "Kicked";
-
-                return (
-                  <div
-                    key={status}
-                    className={cn(
-                      "rounded-lg border p-3 text-sm",
-                      isActive && statusBadgeClass(status),
-                      isPast &&
-                        "border-green-500/30 bg-green-500/10 text-green-300",
-                    )}
-                  >
-                    <div className="flex items-center gap-2 font-medium">
-                      {isPast ? (
-                        <Check className="size-4" />
-                      ) : (
-                        <span className="size-2 rounded-full bg-current" />
-                      )}
-                      {status}
-                    </div>
-                  </div>
-                );
-              },
-            )}
-          </div>
-
-          <Card className="bg-background/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="size-4" />
-                Party Members
-              </CardTitle>
-              <CardDescription>
-                Visible accepted and kicked players for this mock run.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <div className="font-medium">HostCarry</div>
-                  <div className="text-sm text-muted-foreground">Host</div>
-                </div>
-                <Badge variant="outline">Host</Badge>
-              </div>
-              {visibleParticipants.map((participant) => (
-                <div
-                  key={participant.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div>
-                    <div className="font-medium">{participant.ign}</div>
-                    <div className="text-sm text-muted-foreground">
-                      Customer rating {participant.customerRating}
-                    </div>
-                  </div>
-                  <Badge className={statusBadgeClass(participant.status)}>
-                    {participant.status}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </CardContent>
-        <CardFooter className="justify-between gap-3 border-t">
-          <Button
-            variant="outline"
-            disabled={!canCancel}
-            onClick={handleCancelApplication}
-          >
-            Cancel Application
-          </Button>
-          <Button disabled={!canCopyWhisper} onClick={copyWhisper}>
-            <Copy className="size-4" />
-            Copy Whisper
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="size-5" />
-              End-of-Run Vote
-            </CardTitle>
-            <CardDescription>
-              Customers can rate the host after the party ends.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="rounded-lg border bg-background/40 p-3">
-              <div className="font-medium">HostCarry</div>
-              <div className="text-sm text-muted-foreground">
-                Host rating target
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={hostRating === "up" ? "default" : "outline"}
-                disabled={partyStatus !== "Ended"}
-                onClick={() => setHostRating("up")}
-                className="flex-1"
-              >
-                <ThumbsUp className="size-4" />
-                Up
-              </Button>
-              <Button
-                variant={hostRating === "down" ? "destructive" : "outline"}
-                disabled={partyStatus !== "Ended"}
-                onClick={() => setHostRating("down")}
-                className="flex-1"
-              >
-                <ThumbsDown className="size-4" />
-                Down
-              </Button>
-            </div>
-            {partyStatus !== "Ended" && (
-              <p className="text-sm text-muted-foreground">
-                Voting unlocks when the party status becomes Ended.
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-white">
+                Application {applicationStatus}
+              </h2>
+              <p className="text-sm text-zinc-400">
+                Your application was {applicationStatus.toLowerCase()}. You can
+                search for other parties.
               </p>
-            )}
-          </CardContent>
+            </div>
+          </div>
         </Card>
       </div>
+    );
+  }
+
+  return (
+    <div className="w-full space-y-4">
+      {/* View Header */}
+      <h1 className="text-2xl font-bold text-white">Active Application</h1>
+
+      {/* Dynamic Status Banner */}
+      {applicationStatus === "Accepted" ? (
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center sm:gap-4 rounded-lg border border-green-500/30 bg-green-950/30 p-5">
+          <div className="mb-4 sm:mb-0 flex items-center gap-2">
+            <Check className="size-5 text-green-400" />
+            <div>
+              <h2 className="text-lg font-bold text-green-400">
+                Application Accepted!
+              </h2>
+              <p className="text-sm text-zinc-300">
+                The host is ready for you. Copy the whisper message below to
+                contact them in-game.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={copyWhisper}
+            className="w-full sm:w-auto sm:min-w-[140px]"
+          >
+            <Copy className="mr-2 size-4" />
+            Copy Whisper
+          </Button>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-zinc-700 bg-zinc-900/50 p-5">
+          <div className="flex items-center gap-2">
+            <Clock className="size-5 text-zinc-400" />
+            <h2 className="text-lg font-bold text-zinc-300">
+              Waiting for Host
+            </h2>
+          </div>
+          <p className="mt-2 text-sm text-zinc-400">
+            You are in the queue. The host will review your application.
+          </p>
+        </div>
+      )}
+
+      {/* Party Details Card */}
+      <Card className="border-zinc-800 bg-zinc-950">
+        <CardContent className="p-5 space-y-4">
+          {/* Top Row: Category & Fee */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <Badge className="bg-orange-500/20 text-orange-300 text-xs font-bold uppercase">
+                {categoryDisplayName}
+              </Badge>
+              <h2 className="text-xl font-bold text-white">{partyTitle}</h2>
+            </div>
+            <div className="rounded-md border border-white/10 bg-black/30 px-3 py-2">
+              <div className="flex items-center gap-2 text-base font-semibold text-white">
+                {cost}{" "}
+                <CurrencyBadge
+                  currency={{
+                    name: currencyName,
+                    icon: currencyIcon ?? null,
+                  }}
+                  showLabel={true}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Host Info Block */}
+          <div className="inline-flex rounded-md border border-white/10 bg-zinc-900/50 p-4">
+            <div className="flex items-center gap-6">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase text-zinc-500">
+                  Hosted By
+                </p>
+                <div className="flex items-center gap-2">
+                  <Shield className="size-4 text-zinc-400" />
+                  <span className="font-medium text-white">{hostIgn}</span>
+                </div>
+              </div>
+              <div className="w-px h-8 bg-zinc-800" />
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase text-zinc-500">
+                  Rating
+                </p>
+                <div className="flex items-center gap-1">
+                  <Star className="size-4 text-green-400 fill-green-400" />
+                  <span className="font-medium text-green-400">
+                    {hostRatingProp.toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <Separator className="bg-white/10" />
+
+          {/* Description */}
+          <p className="whitespace-pre-line text-sm leading-6 text-zinc-400">
+            {partyDescription || form.description}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Secondary Actions - Cancel Application */}
+      {canCancel && (
+        <Button
+          variant="outline"
+          onClick={handleCancelApplication}
+          className="w-full border-red-500/50 text-red-400 hover:bg-red-950/20 hover:text-red-300"
+        >
+          <X className="mr-2 size-4" />
+          Cancel Application
+        </Button>
+      )}
     </div>
   );
 }

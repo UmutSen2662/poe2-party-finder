@@ -3,6 +3,7 @@ import { subscribeToLiveParties } from "../../lib/party-live-events";
 import {
   cancelParty,
   createParty,
+  getActivePartyForHost,
   getPartyApplications,
   getPartyRatingTargets,
   getSearchPartyById,
@@ -42,6 +43,7 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
       minPrice: t.Optional(t.Number()),
       maxPrice: t.Optional(t.Number()),
       q: t.Optional(t.String()),
+      excludeHostId: t.Optional(t.Number()),
     }),
   })
   .get(
@@ -130,5 +132,13 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
       params: t.Object({ id: t.Number() }),
       query: t.Object({ customerId: t.Optional(t.Number()) }),
       response: t.Object({ whisperMessage: t.String() }),
+    },
+  )
+  .get(
+    "/active/:hostId",
+    ({ params }) => getActivePartyForHost(params.hostId),
+    {
+      params: t.Object({ hostId: t.Number() }),
+      response: t.Union([PartySchema, t.Null()]),
     },
   );

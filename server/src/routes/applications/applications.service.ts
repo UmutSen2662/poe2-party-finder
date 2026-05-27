@@ -213,6 +213,26 @@ export const deleteApplication = async (
   }
 };
 
+export const getPlayerApplications = async (
+  playerId: number,
+): Promise<ApplicationRow[]> => {
+  try {
+    const applications = await db
+      .select()
+      .from(applies)
+      .where(eq(applies.playerId, playerId));
+
+    return applications.map(toApplicationRow);
+  } catch (error) {
+    console.error("Database error in getPlayerApplications:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "getPlayerApplications",
+      context: { playerId },
+    });
+    throw new DatabaseError("Failed to fetch player applications");
+  }
+};
+
 export const getPlayerApplicationStatus = async (
   playerId: number,
   partyId: number,
