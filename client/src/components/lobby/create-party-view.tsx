@@ -70,12 +70,19 @@ interface CreatePartyViewProps {
     categoryId: number;
     currencyId: number;
   }) => void;
+  userBadges?: Array<{
+    id: number;
+    name: string;
+    icon: string | null;
+    rarity: "common" | "uncommon" | "rare" | "legendary";
+  }>;
 }
 
 export function CreatePartyView({
   form,
   setForm,
   templates,
+  userBadges = [],
   categories,
   leagues,
   currencies,
@@ -468,6 +475,7 @@ export function CreatePartyView({
           fee={Number(form.cost) || 0}
           currentQueue={0}
           maxQueue={Number(form.capacity) || 1}
+          hostBadges={userBadges}
           onApply={() => undefined}
         />
       </div>

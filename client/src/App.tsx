@@ -3,6 +3,7 @@ import { Activity, Suspense, useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/auth-context";
 import { Layout } from "./layout";
 import { queryClient } from "./lib/queryClient";
+import { BadgePage } from "./pages/badge-page";
 import { LobbyPage } from "./pages/lobby-page";
 import { LoginPage } from "./pages/login-page";
 import { SearchPage } from "./pages/search-page";
@@ -81,6 +82,10 @@ function AppContent() {
 
         <TabPage currentTab={activeTab} tabId="lobby" mode="hide">
           <LobbyPage />
+        </TabPage>
+
+        <TabPage currentTab={activeTab} tabId="badges" mode="hide">
+          <BadgePage />
         </TabPage>
 
         <TabPage currentTab={activeTab} tabId="test" mode="hide">

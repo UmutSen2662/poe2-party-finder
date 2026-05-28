@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { badgeCategories, badges, earns } from "../../db/schema";
 import { DatabaseError, NotFoundError } from "../../lib/errors";
@@ -10,6 +10,7 @@ const toBadgeRow = (badge: BadgeRecord) => ({
   name: badge.name,
   icon: badge.icon,
   description: badge.description,
+  rarity: badge.rarity,
   condition: badge.condition,
 });
 
@@ -136,5 +137,62 @@ export const deleteBadge = async (id: number) => {
       context: { badgeId: id },
     });
     throw new DatabaseError("Failed to delete badge");
+  }
+};
+
+export const getPlayerBadges = async (playerId: number) => {
+  try {
+    const allBadges = await db.select().from(badges).orderBy(asc(badges.name));
+    const playerEarned = await db
+      .select()
+      .from(earns)
+      .where(eq(earns.playerId, playerId));
+
+    const earnedBadgeIds = new Set(playerEarned.map((e) => e.badgeId));
+    const pinnedBadgeIds = new Set(
+      playerEarned.filter((e) => e.pinned).map((e) => e.badgeId),
+    );
+
+    return allBadges.map((badge) => ({
+      ...toBadgeRow(badge),
+      earned: earnedBadgeIds.has(badge.id),
+      equipped: pinnedBadgeIds.has(badge.id),
+    }));
+  } catch (error) {
+    console.error("Database error in getPlayerBadges:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "getPlayerBadges",
+      context: { playerId },
+    });
+    throw new DatabaseError("Failed to fetch player badges");
+  }
+};
+
+export const updateEquippedBadges = async (
+  playerId: number,
+  badgeIds: number[],
+) => {
+  try {
+    await db
+      .update(earns)
+      .set({ pinned: false })
+      .where(eq(earns.playerId, playerId));
+
+    const badgesToPin = badgeIds.slice(0, 3);
+    for (const badgeId of badgesToPin) {
+      await db
+        .update(earns)
+        .set({ pinned: true })
+        .where(and(eq(earns.playerId, playerId), eq(earns.badgeId, badgeId)));
+    }
+
+    return getPlayerBadges(playerId);
+  } catch (error) {
+    console.error("Database error in updateEquippedBadges:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "updateEquippedBadges",
+      context: { playerId, badgeIds },
+    });
+    throw new DatabaseError("Failed to update equipped badges");
   }
 };

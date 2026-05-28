@@ -36,6 +36,13 @@
       "when": 1779883486260,
       "tag": "0004_bitter_warhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779999674205,
+      "tag": "0005_quiet_frightful_four",
+      "breakpoints": true
     }
   ]
 }

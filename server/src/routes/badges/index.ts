@@ -5,6 +5,8 @@ import {
   deleteBadge,
   getAllBadges,
   getBadgesByCategory,
+  getPlayerBadges,
+  updateEquippedBadges,
 } from "./badges.service";
 
 const BadgeSchema = t.Object({
@@ -12,7 +14,29 @@ const BadgeSchema = t.Object({
   name: t.String(),
   icon: t.Nullable(t.String()),
   description: t.Nullable(t.String()),
+  rarity: t.Union([
+    t.Literal("common"),
+    t.Literal("uncommon"),
+    t.Literal("rare"),
+    t.Literal("legendary"),
+  ]),
   condition: t.Record(t.String(), t.Unknown()),
+});
+
+const PlayerBadgeSchema = t.Object({
+  id: t.Number(),
+  name: t.String(),
+  icon: t.Nullable(t.String()),
+  description: t.Nullable(t.String()),
+  rarity: t.Union([
+    t.Literal("common"),
+    t.Literal("uncommon"),
+    t.Literal("rare"),
+    t.Literal("legendary"),
+  ]),
+  condition: t.Record(t.String(), t.Unknown()),
+  earned: t.Boolean(),
+  equipped: t.Boolean(),
 });
 
 export const badgesRoutes = new Elysia({ prefix: "/badges" })
@@ -44,6 +68,21 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
       pinned: t.Optional(t.Boolean()),
     }),
   })
+  .get("/player/:playerId", ({ params }) => getPlayerBadges(params.playerId), {
+    params: t.Object({ playerId: t.Number() }),
+    response: t.Array(PlayerBadgeSchema),
+  })
+  .put(
+    "/player/:playerId/equipped",
+    ({ params, body }) => updateEquippedBadges(params.playerId, body.badgeIds),
+    {
+      params: t.Object({ playerId: t.Number() }),
+      body: t.Object({
+        badgeIds: t.Array(t.Number()),
+      }),
+      response: t.Array(PlayerBadgeSchema),
+    },
+  )
   .delete("/:id", ({ params }) => deleteBadge(params.id), {
     params: t.Object({ id: t.Number() }),
     response: BadgeSchema,

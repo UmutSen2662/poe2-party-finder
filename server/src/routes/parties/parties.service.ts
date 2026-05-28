@@ -2,8 +2,10 @@ import { and, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import {
   applies,
+  badges,
   categories,
   currencies,
+  earns,
   leagues,
   parties,
   players,
@@ -49,6 +51,12 @@ export interface SearchPartyRow extends PartyRow {
     hostRating: number;
     hostThumbsUp: number;
     hostThumbsDown: number;
+    equippedBadges: Array<{
+      id: number;
+      name: string;
+      icon: string | null;
+      rarity: "common" | "uncommon" | "rare" | "legendary";
+    }>;
   };
   league: {
     id: number;
@@ -82,7 +90,30 @@ const toPartyRow = (party: PartyRecord): PartyRow => ({
   currencyId: party.currencyId,
 });
 
-const toSearchPartyRow = ({
+const getEquippedBadges = async (playerId: number) => {
+  const equippedEarns = await db
+    .select()
+    .from(earns)
+    .where(and(eq(earns.playerId, playerId), eq(earns.pinned, true)))
+    .limit(3);
+
+  if (equippedEarns.length === 0) return [];
+
+  const badgeIds = equippedEarns.map((e) => e.badgeId);
+  const badgeRecords = await db
+    .select()
+    .from(badges)
+    .where(sql`${badges.id} = ANY(${badgeIds})`);
+
+  return badgeRecords.map((badge) => ({
+    id: badge.id,
+    name: badge.name,
+    icon: badge.icon,
+    rarity: badge.rarity,
+  }));
+};
+
+const toSearchPartyRow = async ({
   party,
   host,
   league,
@@ -96,33 +127,38 @@ const toSearchPartyRow = ({
   category: typeof categories.$inferSelect;
   currency: typeof currencies.$inferSelect;
   acceptedCount: number;
-}): SearchPartyRow => ({
-  ...toPartyRow(party),
-  acceptedCount,
-  host: {
-    id: host.id,
-    ign: host.ign,
-    hostRating: host.hostRating,
-    hostThumbsUp: host.hostThumbsUp,
-    hostThumbsDown: host.hostThumbsDown,
-  },
-  league: {
-    id: league.id,
-    name: league.name,
-    status: toPublicStatus(league.status),
-  },
-  category: {
-    id: category.id,
-    name: category.displayName,
-    image: category.imagePath,
-    status: toPublicStatus(category.status),
-  },
-  currency: {
-    id: currency.id,
-    name: currency.name,
-    icon: currency.icon,
-  },
-});
+}): Promise<SearchPartyRow> => {
+  const equippedBadges = await getEquippedBadges(host.id);
+
+  return {
+    ...toPartyRow(party),
+    acceptedCount,
+    host: {
+      id: host.id,
+      ign: host.ign,
+      hostRating: host.hostRating,
+      hostThumbsUp: host.hostThumbsUp,
+      hostThumbsDown: host.hostThumbsDown,
+      equippedBadges,
+    },
+    league: {
+      id: league.id,
+      name: league.name,
+      status: toPublicStatus(league.status),
+    },
+    category: {
+      id: category.id,
+      name: category.displayName,
+      image: category.imagePath,
+      status: toPublicStatus(category.status),
+    },
+    currency: {
+      id: currency.id,
+      name: currency.name,
+      icon: currency.icon,
+    },
+  };
+};
 
 const getPartyRecord = async (partyId: number): Promise<PartyRecord> => {
   const [party] = await db
@@ -224,7 +260,7 @@ export const searchParties = async (
       .where(and(...conditions))
       .orderBy(desc(parties.createdAt));
 
-    return rows.map(toSearchPartyRow);
+    return Promise.all(rows.map(toSearchPartyRow));
   } catch (error) {
     console.error("Database error in searchParties:", {
       error: error instanceof Error ? error.message : String(error),
@@ -266,7 +302,7 @@ export const getSearchPartyById = async (
       throw new NotFoundError("Party not found");
     }
 
-    return toSearchPartyRow(row);
+    return await toSearchPartyRow(row);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;

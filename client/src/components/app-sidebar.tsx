@@ -1,5 +1,5 @@
 import { useHotkey } from "@tanstack/react-hotkeys";
-import { FlaskConical, HomeIcon, Settings, Users } from "lucide-react";
+import { Award, FlaskConical, HomeIcon, Settings, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
@@ -28,8 +28,9 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
   // Navigation Hotkeys
   useHotkey("Mod+1", () => setActiveTab("home"));
   useHotkey("Mod+2", () => setActiveTab("lobby"));
-  useHotkey("Mod+3", () => setActiveTab("test"));
-  useHotkey("Mod+4", () => setActiveTab("settings"));
+  useHotkey("Mod+3", () => setActiveTab("badges"));
+  useHotkey("Mod+4", () => setActiveTab("test"));
+  useHotkey("Mod+5", () => setActiveTab("settings"));
 
   return (
     <Sidebar collapsible="icon" className="select-none">
@@ -98,10 +99,30 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
                   tooltip={{
                     children: (
                       <div className="flex items-center gap-2">
-                        Test
+                        Badges
                         <KbdGroup>
                           <Kbd>Ctrl</Kbd>
                           <Kbd>3</Kbd>
+                        </KbdGroup>
+                      </div>
+                    ),
+                  }}
+                  isActive={activeTab === "badges"}
+                  onClick={() => setActiveTab("badges")}
+                >
+                  <Award />
+                  <span>Badges</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={{
+                    children: (
+                      <div className="flex items-center gap-2">
+                        Test
+                        <KbdGroup>
+                          <Kbd>Ctrl</Kbd>
+                          <Kbd>4</Kbd>
                         </KbdGroup>
                       </div>
                     ),
@@ -129,7 +150,7 @@ export function AppSidebar({ activeTab, setActiveTab }: AppSidebarProps) {
                     Settings
                     <KbdGroup>
                       <Kbd>Ctrl</Kbd>
-                      <Kbd>4</Kbd>
+                      <Kbd>5</Kbd>
                     </KbdGroup>
                   </div>
                 ),

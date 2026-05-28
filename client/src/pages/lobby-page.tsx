@@ -52,6 +52,17 @@ const currenciesQuery = queryOptions({
   },
 });
 
+const playerBadgesQuery = (playerId: number) =>
+  queryOptions({
+    queryKey: ["badges", "player", playerId],
+    queryFn: async () => {
+      const { data, error } = await api.badges.player[playerId].get();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!playerId,
+  });
+
 const lobbyStateQuery = (playerId: number) =>
   queryOptions({
     queryKey: ["lobby", "state"],
@@ -118,6 +129,10 @@ export function LobbyPage() {
   const { data: categories } = useSuspenseQuery(categoriesQuery);
   const { data: leagues } = useSuspenseQuery(leaguesQuery);
   const { data: currencies } = useSuspenseQuery(currenciesQuery);
+
+  // Fetch user badges
+  const { data: userBadges = [] } = useQuery(playerBadgesQuery(user?.id || 0));
+  const equippedBadges = userBadges.filter((badge) => badge.equipped);
 
   // Fetch lobby state
   const { data: lobbyState } = useQuery({
@@ -492,6 +507,7 @@ export function LobbyPage() {
           onSaveTemplate={saveTemplate}
           onDeleteTemplate={(index) => deleteTemplateMutation.mutate(index)}
           onCreateParty={(payload) => createPartyMutation.mutate(payload)}
+          userBadges={equippedBadges}
         />
       )}
       {activeView === "customer" && (

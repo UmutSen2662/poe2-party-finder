@@ -49,6 +49,12 @@ export const applicationStatusEnum = pgEnum("application_status", [
   "rejected",
   "kicked",
 ]);
+export const badgeRarityEnum = pgEnum("badge_rarity", [
+  "common",
+  "uncommon",
+  "rare",
+  "legendary",
+]);
 
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
@@ -111,6 +117,7 @@ export const badges = pgTable("badges", {
   name: varchar("name", { length: 255 }).notNull(),
   icon: varchar("icon", { length: 255 }),
   description: text("description"),
+  rarity: badgeRarityEnum("rarity").default("common").notNull(),
   condition: jsonb("condition").$type<BadgeCondition>().notNull(),
 });
 

@@ -40,6 +40,12 @@ interface PartyCardProps {
   hasApplied?: boolean;
   onRefresh?: () => void;
   onApply?: () => void;
+  hostBadges?: Array<{
+    id: number;
+    name: string;
+    icon: string | null;
+    rarity: "common" | "uncommon" | "rare" | "legendary";
+  }>;
 }
 
 export function PartyCard({
@@ -59,6 +65,7 @@ export function PartyCard({
   hasApplied = false,
   onRefresh,
   onApply,
+  hostBadges = [],
 }: PartyCardProps) {
   const now = useNow();
   const createdAtMs = createdAt ? new Date(createdAt).getTime() : null;
@@ -150,9 +157,18 @@ export function PartyCard({
               isDisabled && "grayscale opacity-70",
             )}
           >
-            <div className="flex-1 aspect-square bg-white/20 rounded" />
-            <div className="flex-1 aspect-square bg-white/20 rounded" />
-            <div className="flex-1 aspect-square bg-white/20 rounded" />
+            {[0, 1, 2].map((slotIndex) => {
+              const slotBadge = hostBadges[slotIndex];
+              return (
+                <div
+                  key={slotIndex}
+                  className="flex-1 aspect-square bg-white/20 rounded flex items-center justify-center text-lg"
+                  title={slotBadge?.name}
+                >
+                  {slotBadge?.icon || (slotBadge ? "🏆" : null)}
+                </div>
+              );
+            })}
           </div>
 
           {/* Listed Time */}

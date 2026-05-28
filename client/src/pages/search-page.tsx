@@ -343,6 +343,7 @@ export function SearchPage() {
               hasApplied={myApplications?.some(
                 (app) => app.partyId === party.id,
               )}
+              hostBadges={party.host.equippedBadges}
               onRefresh={() => handleRefreshParty(party.id)}
               onApply={() => applyMutation.mutate(party.id)}
             />
