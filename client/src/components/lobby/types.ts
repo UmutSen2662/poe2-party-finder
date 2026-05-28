@@ -3,7 +3,6 @@ import type {
   PublicPartyStatus,
 } from "@poe2-party-finder/server/src/routes/lobby/lobby.service";
 
-export type LobbyView = "create" | "customer" | "host";
 export type PartyStatus = PublicPartyStatus;
 export type ApplicationStatus = PublicApplicationStatus;
 export type RatingVote = "up" | "down" | null;

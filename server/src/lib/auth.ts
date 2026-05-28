@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { verifyToken, getUserById } from "../routes/auth/auth.service";
+import { getUserById, verifyToken } from "../routes/auth/auth.service";
 import { ValidationError } from "./errors";
 
 export const authMiddleware = new Elysia({ name: "auth" }).derive(

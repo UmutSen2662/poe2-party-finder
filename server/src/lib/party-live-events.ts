@@ -17,6 +17,10 @@ export type PartyLiveEvent =
       data: SearchPartyRow;
     }
   | {
+      type: "party.status.updated";
+      data: { partyId: number; status: string };
+    }
+  | {
       type: "heartbeat";
       data: { timestamp: string };
     };
@@ -122,6 +126,18 @@ export const publishPartyCreated = (party: SearchPartyRow): void => {
         data: party,
       });
     }
+  }
+};
+
+export const publishPartyStatusUpdated = (
+  partyId: number,
+  status: string,
+): void => {
+  for (const subscriber of subscribers) {
+    enqueue(subscriber, {
+      type: "party.status.updated",
+      data: { partyId, status },
+    });
   }
 };
 

@@ -3,8 +3,6 @@ import {
   Play,
   Square,
   Star,
-  ThumbsDown,
-  ThumbsUp,
   UserMinus,
   UserPlus,
   Users,
@@ -31,31 +29,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/auth-context";
-import type {
-  Applicant,
-  ApplicationStatus,
-  PartyFormState,
-  PartyStatus,
-  RatingVote,
-} from "./types";
+import { RatingDialog } from "./rating-dialog";
+import type { Applicant, ApplicationStatus, PartyStatus } from "./types";
 import { statusBadgeClass } from "./utils";
 
 interface HostLobbyViewProps {
-  form: PartyFormState;
+  capacity: string;
   partyId: number;
   partyTitle: string;
   partyDescription?: string;
   partyStatus: PartyStatus;
   applicants: Applicant[];
+  submittedRatings: Set<string>;
   onStartParty: (partyId: number) => void;
   onEndParty: (partyId: number) => void;
   onCancelParty: (partyId: number) => void;
@@ -113,7 +99,7 @@ function ConfirmAction({
             onClick={onConfirm}
             className={
               actionVariant === "destructive"
-                ? "bg-destructive text-white hover:bg-destructive/90"
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 : undefined
             }
           >
@@ -126,12 +112,13 @@ function ConfirmAction({
 }
 
 export function HostLobbyView({
-  form,
+  capacity,
   partyId,
   partyTitle,
   partyDescription,
   partyStatus,
   applicants,
+  submittedRatings,
   onStartParty,
   onEndParty,
   onCancelParty,
@@ -140,7 +127,6 @@ export function HostLobbyView({
 }: HostLobbyViewProps) {
   const { user } = useAuth();
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
-  const [ratings, setRatings] = useState<Record<string, RatingVote>>({});
   const acceptedCount = applicants.filter(
     (applicant) => applicant.status === "Accepted",
   ).length;
@@ -195,18 +181,18 @@ export function HostLobbyView({
                 </Badge>
                 <Badge variant="outline" className="gap-1">
                   <Users className="size-3" />
-                  {acceptedCount} / {form.capacity} accepted
+                  {acceptedCount} / {capacity} accepted
                 </Badge>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-3 rounded-xl border bg-[#111] p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/50 p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <h2 className="truncate font-semibold text-white">
+                <h2 className="truncate font-semibold text-foreground">
                   {partyTitle}
                 </h2>
-                <p className="mt-1 text-sm text-zinc-400">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {partyDescription || "No description"}
                 </p>
               </div>
@@ -327,75 +313,21 @@ export function HostLobbyView({
         </Card>
       </div>
 
-      <Dialog open={ratingDialogOpen} onOpenChange={setRatingDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Post-Run Ratings</DialogTitle>
-            <DialogDescription>
-              Rate all accepted or kicked customers from this run.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            {ratingTargets.map((applicant) => (
-              <div
-                key={applicant.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3"
-              >
-                <div>
-                  <div className="font-medium">{applicant.ign}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Final status: {applicant.status}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={
-                      ratings[applicant.id] === "up" ? "default" : "outline"
-                    }
-                    size="icon"
-                    onClick={() => {
-                      setRatings((current) => ({
-                        ...current,
-                        [applicant.id]: "up",
-                      }));
-                      handleSubmitRating(applicant.id, 1);
-                    }}
-                  >
-                    <ThumbsUp className="size-4" />
-                  </Button>
-                  <Button
-                    variant={
-                      ratings[applicant.id] === "down"
-                        ? "destructive"
-                        : "outline"
-                    }
-                    size="icon"
-                    onClick={() => {
-                      setRatings((current) => ({
-                        ...current,
-                        [applicant.id]: "down",
-                      }));
-                      handleSubmitRating(applicant.id, -1);
-                    }}
-                  >
-                    <ThumbsDown className="size-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {ratingTargets.length === 0 && (
-              <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                No accepted or kicked customers to rate yet.
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setRatingDialogOpen(false)}>
-              Submit Ratings
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RatingDialog
+        open={ratingDialogOpen}
+        onOpenChange={setRatingDialogOpen}
+        title="Post-Run Ratings"
+        description="Rate all accepted or kicked customers from this run."
+        targets={ratingTargets.map((applicant) => ({
+          id: Number(applicant.id),
+          ign: applicant.ign,
+          status: applicant.status,
+        }))}
+        onSubmitRating={(targetId, value) => {
+          handleSubmitRating(String(targetId), value);
+        }}
+        submittedRatings={submittedRatings}
+      />
     </>
   );
 }

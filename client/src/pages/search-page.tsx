@@ -200,7 +200,10 @@ export function SearchPage() {
     // A full search resets per-card freshness — every card displays data
     // that was just fetched.
     setRefreshedAt({});
-    setSubmittedParams(buildParams(filterState));
+    const params = buildParams(filterState);
+    setSubmittedParams(params);
+    // Force refetch even if params haven't changed
+    queryClient.invalidateQueries({ queryKey: ["parties", params] });
   };
 
   const handleRefreshParty = async (partyId: number) => {

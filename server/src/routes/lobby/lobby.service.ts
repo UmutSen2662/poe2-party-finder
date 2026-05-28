@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../../db";
 import {
   applies,
@@ -7,6 +7,7 @@ import {
   leagues,
   parties,
   players,
+  ratings,
 } from "../../db/schema";
 import { DatabaseError, NotFoundError } from "../../lib/errors";
 import {
@@ -115,7 +116,7 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
   try {
     console.log("getLobbyState called for playerId:", playerId);
     // Check if player is hosting an active party
-    const hostedParty = await db
+    const hostedPartyQuery = await db
       .select({
         id: parties.id,
         title: parties.title,
@@ -153,13 +154,16 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
       .innerJoin(categories, eq(parties.categoryId, categories.id))
       .innerJoin(currencies, eq(parties.currencyId, currencies.id))
       .leftJoin(players, eq(parties.hostId, players.id))
-      .where(and(eq(parties.hostId, playerId), eq(parties.status, "gathering")))
+      .where(
+        and(
+          eq(parties.hostId, playerId),
+          sql`${parties.status} in ('gathering', 'started')`,
+        ),
+      )
       .limit(1);
 
-    console.log("Hosted party query result:", hostedParty);
-
-    if (hostedParty.length > 0) {
-      const party = hostedParty[0];
+    if (hostedPartyQuery.length > 0) {
+      const party = hostedPartyQuery[0];
       return {
         kind: "host",
         party: {
@@ -195,8 +199,113 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
       };
     }
 
+    // Check for ended parties with unrated customers
+    const endedHostedParty = await db
+      .select({
+        id: parties.id,
+        title: parties.title,
+        description: parties.description,
+        capacity: parties.capacity,
+        cost: parties.cost,
+        status: parties.status,
+        createdAt: parties.createdAt,
+        hostId: parties.hostId,
+        leagueId: parties.leagueId,
+        categoryId: parties.categoryId,
+        currencyId: parties.currencyId,
+        host: {
+          id: players.id,
+          ign: players.ign,
+          hostRating: players.hostRating,
+        },
+        league: {
+          id: leagues.id,
+          name: leagues.name,
+        },
+        category: {
+          id: categories.id,
+          displayName: categories.displayName,
+          imagePath: categories.imagePath,
+        },
+        currency: {
+          id: currencies.id,
+          name: currencies.name,
+          icon: currencies.icon,
+        },
+      })
+      .from(parties)
+      .innerJoin(leagues, eq(parties.leagueId, leagues.id))
+      .innerJoin(categories, eq(parties.categoryId, categories.id))
+      .innerJoin(currencies, eq(parties.currencyId, currencies.id))
+      .leftJoin(players, eq(parties.hostId, players.id))
+      .where(and(eq(parties.hostId, playerId), eq(parties.status, "ended")))
+      .limit(1);
+
+    if (endedHostedParty.length > 0) {
+      const party = endedHostedParty[0];
+      // Check if there are unrated customers
+      const applications = await db
+        .select({ playerId: applies.playerId })
+        .from(applies)
+        .where(
+          and(
+            eq(applies.partyId, party.id),
+            sql`${applies.status} in ('accepted', 'kicked')`,
+          ),
+        );
+
+      const givenRatings = await db
+        .select({ receiverId: ratings.receiverId })
+        .from(ratings)
+        .where(
+          and(eq(ratings.partyId, party.id), eq(ratings.giverId, playerId)),
+        );
+
+      const ratedPlayerIds = new Set(givenRatings.map((r) => r.receiverId));
+      const unratedTargets = applications.filter(
+        (app) => !ratedPlayerIds.has(app.playerId),
+      );
+
+      // Only show ended party if there are unrated customers
+      if (unratedTargets.length > 0) {
+        return {
+          kind: "host",
+          party: {
+            id: party.id,
+            title: party.title,
+            description: party.description,
+            capacity: party.capacity,
+            cost: party.cost,
+            status: toPublicPartyStatus(party.status),
+            createdAt: party.createdAt,
+            host: party.host
+              ? {
+                  id: party.host.id,
+                  ign: party.host.ign,
+                  hostRating: Number(party.host.hostRating),
+                }
+              : null,
+            league: {
+              id: party.league.id,
+              name: party.league.name,
+            },
+            category: {
+              id: party.category.id,
+              displayName: party.category.displayName,
+              imagePath: party.category.imagePath,
+            },
+            currency: {
+              id: party.currency.id,
+              name: party.currency.name,
+              icon: party.currency.icon,
+            },
+          },
+        };
+      }
+    }
+
     // Check if player has an active application
-    const application = await db
+    const applicationQuery = await db
       .select({
         playerId: applies.playerId,
         partyId: applies.partyId,
@@ -240,16 +349,19 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
       .innerJoin(currencies, eq(parties.currencyId, currencies.id))
       .leftJoin(players, eq(parties.hostId, players.id))
       .where(
-        and(eq(applies.playerId, playerId), eq(parties.status, "gathering")),
+        and(
+          eq(applies.playerId, playerId),
+          sql`${parties.status} in ('gathering', 'started')`,
+        ),
       )
       .limit(1);
 
-    if (application.length > 0) {
-      const app = application[0];
+    if (applicationQuery.length > 0) {
+      const app = applicationQuery[0];
       return {
         kind: "customer",
         application: {
-          id: app.playerId, // Using composite key, but this is a simplified version
+          id: app.playerId,
           playerId: app.playerId,
           partyId: app.partyId,
           status: toPublicApplicationStatus(app.applicationStatus),
@@ -286,6 +398,119 @@ export async function getLobbyState(playerId: number): Promise<LobbyState> {
           },
         },
       };
+    }
+
+    // Check for ended parties where customer hasn't rated the host
+    const endedApplication = await db
+      .select({
+        playerId: applies.playerId,
+        partyId: applies.partyId,
+        applicationStatus: applies.status,
+        appliedAt: applies.appliedAt,
+        partyId2: parties.id,
+        title: parties.title,
+        description: parties.description,
+        capacity: parties.capacity,
+        cost: parties.cost,
+        partyStatus: parties.status,
+        createdAt: parties.createdAt,
+        hostId: parties.hostId,
+        leagueId: parties.leagueId,
+        categoryId: parties.categoryId,
+        currencyId: parties.currencyId,
+        host: {
+          id: players.id,
+          ign: players.ign,
+          hostRating: players.hostRating,
+        },
+        league: {
+          id: leagues.id,
+          name: leagues.name,
+        },
+        category: {
+          id: categories.id,
+          displayName: categories.displayName,
+          imagePath: categories.imagePath,
+        },
+        currency: {
+          id: currencies.id,
+          name: currencies.name,
+          icon: currencies.icon,
+        },
+      })
+      .from(applies)
+      .innerJoin(parties, eq(applies.partyId, parties.id))
+      .innerJoin(leagues, eq(parties.leagueId, leagues.id))
+      .innerJoin(categories, eq(parties.categoryId, categories.id))
+      .innerJoin(currencies, eq(parties.currencyId, currencies.id))
+      .leftJoin(players, eq(parties.hostId, players.id))
+      .where(
+        and(
+          eq(applies.playerId, playerId),
+          eq(parties.status, "ended"),
+          sql`${applies.status} in ('accepted', 'kicked')`,
+        ),
+      )
+      .limit(1);
+
+    if (endedApplication.length > 0) {
+      const app = endedApplication[0];
+      // Check if customer has already rated the host
+      const existingRating = await db
+        .select()
+        .from(ratings)
+        .where(
+          and(
+            eq(ratings.partyId, app.partyId),
+            eq(ratings.giverId, playerId),
+            eq(ratings.receiverId, app.hostId || 0),
+          ),
+        )
+        .limit(1);
+
+      // Only show ended party if customer hasn't rated the host yet
+      if (existingRating.length === 0) {
+        return {
+          kind: "customer",
+          application: {
+            id: app.playerId,
+            playerId: app.playerId,
+            partyId: app.partyId,
+            status: toPublicApplicationStatus(app.applicationStatus),
+            appliedAt: app.appliedAt,
+            party: {
+              id: app.partyId2,
+              title: app.title,
+              description: app.description,
+              capacity: app.capacity,
+              cost: app.cost,
+              status: toPublicPartyStatus(app.partyStatus),
+              createdAt: app.createdAt,
+              host: app.host
+                ? {
+                    id: app.host.id,
+                    ign: app.host.ign,
+                    hostRating: Number(app.host.hostRating),
+                  }
+                : null,
+              league: {
+                id: app.league.id,
+                name: app.league.name,
+              },
+              category: {
+                id: app.category.id,
+                displayName: app.category.displayName,
+                imagePath: app.category.imagePath,
+              },
+              currency: {
+                id: app.currency.id,
+                name: app.currency.name,
+                icon: app.currency.icon,
+              },
+            },
+          },
+        };
+      }
     }
 
     // Player has no active party or application

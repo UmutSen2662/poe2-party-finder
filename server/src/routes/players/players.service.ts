@@ -23,7 +23,7 @@ type PlayerRecord = typeof players.$inferSelect;
 export interface PlayerRow {
   id: number;
   ign: string;
-  oauth2: string;
+  oauth2: string | null;
   templates: ServiceTemplate[];
   hostRating: number;
   customerRating: number;

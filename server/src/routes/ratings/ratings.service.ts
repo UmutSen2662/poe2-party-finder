@@ -208,3 +208,134 @@ export const getPartyRatings = async (
     throw new DatabaseError("Failed to fetch ratings");
   }
 };
+
+export const getUnvotedPartiesForPlayer = async (
+  playerId: number,
+): Promise<
+  Array<{
+    partyId: number;
+    partyTitle: string;
+    role: "host" | "customer";
+    targets: Array<{
+      id: number;
+      ign: string;
+    }>;
+  }>
+> => {
+  try {
+    const unvotedParties: Array<{
+      partyId: number;
+      partyTitle: string;
+      role: "host" | "customer";
+      targets: Array<{
+        id: number;
+        ign: string;
+      }>;
+    }> = [];
+
+    // Check for parties where player was host and hasn't rated all accepted/kicked customers
+    const hostedParties = await db
+      .select({
+        partyId: parties.id,
+        partyTitle: parties.title,
+      })
+      .from(parties)
+      .where(and(eq(parties.hostId, playerId), eq(parties.status, "ended")));
+
+    for (const party of hostedParties) {
+      // Get all accepted/kicked applications for this party
+      const applications = await db
+        .select({
+          playerId: applies.playerId,
+          playerIgn: players.ign,
+        })
+        .from(applies)
+        .innerJoin(players, eq(applies.playerId, players.id))
+        .where(
+          and(
+            eq(applies.partyId, party.partyId),
+            sql`${applies.status} in ('accepted', 'kicked')`,
+          ),
+        );
+
+      // Get all ratings given by the host for this party
+      const givenRatings = await db
+        .select({ receiverId: ratings.receiverId })
+        .from(ratings)
+        .where(
+          and(
+            eq(ratings.partyId, party.partyId),
+            eq(ratings.giverId, playerId),
+          ),
+        );
+
+      const ratedPlayerIds = new Set(givenRatings.map((r) => r.receiverId));
+      const unratedTargets = applications
+        .filter((app) => !ratedPlayerIds.has(app.playerId))
+        .map((app) => ({ id: app.playerId, ign: app.playerIgn }));
+
+      if (unratedTargets.length > 0) {
+        unvotedParties.push({
+          partyId: party.partyId,
+          partyTitle: party.partyTitle,
+          role: "host",
+          targets: unratedTargets,
+        });
+      }
+    }
+
+    // Check for parties where player was customer and hasn't rated the host
+    const customerParties = await db
+      .select({
+        partyId: parties.id,
+        partyTitle: parties.title,
+        hostId: parties.hostId,
+        hostIgn: players.ign,
+      })
+      .from(applies)
+      .innerJoin(parties, eq(applies.partyId, parties.id))
+      .innerJoin(players, eq(parties.hostId, players.id))
+      .where(
+        and(
+          eq(applies.playerId, playerId),
+          eq(parties.status, "ended"),
+          sql`${applies.status} in ('accepted', 'kicked')`,
+        ),
+      );
+
+    for (const party of customerParties) {
+      if (!party.hostId) continue;
+
+      // Check if customer has already rated the host
+      const existingRating = await db
+        .select()
+        .from(ratings)
+        .where(
+          and(
+            eq(ratings.partyId, party.partyId),
+            eq(ratings.giverId, playerId),
+            eq(ratings.receiverId, party.hostId),
+          ),
+        )
+        .limit(1);
+
+      if (existingRating.length === 0) {
+        unvotedParties.push({
+          partyId: party.partyId,
+          partyTitle: party.partyTitle,
+          role: "customer",
+          targets: [{ id: party.hostId, ign: party.hostIgn }],
+        });
+      }
+    }
+
+    return unvotedParties;
+  } catch (error) {
+    console.error("Database error in getUnvotedPartiesForPlayer:", {
+      error: error instanceof Error ? error.message : String(error),
+      operation: "getUnvotedPartiesForPlayer",
+      context: { playerId },
+    });
+    throw new DatabaseError("Failed to fetch unvoted parties");
+  }
+};

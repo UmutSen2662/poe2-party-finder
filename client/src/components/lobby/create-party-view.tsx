@@ -226,7 +226,7 @@ export function CreatePartyView({
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={confirmDeleteTemplate}
-                    className="bg-destructive text-white hover:bg-destructive/90"
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
                     Delete
                   </AlertDialogAction>

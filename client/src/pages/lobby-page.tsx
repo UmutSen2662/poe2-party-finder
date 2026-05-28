@@ -5,7 +5,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreatePartyView } from "@/components/lobby/create-party-view";
 import { CustomerLobbyView } from "@/components/lobby/customer-lobby-view";
 import { HostLobbyView } from "@/components/lobby/host-lobby-view";
@@ -14,10 +14,14 @@ import type {
   PartyFormState,
   PartyStatus,
 } from "@/components/lobby/types";
+import {
+  type UnvotedParty,
+  UnvotedRatingsDialog,
+} from "@/components/lobby/unvoted-ratings-dialog";
 import { statusBadgeClass } from "@/components/lobby/utils";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
-import { api, assetUrl } from "@/lib/eden";
+import { API_BASE_URL, api, assetUrl } from "@/lib/eden";
 
 const categoriesQuery = queryOptions({
   queryKey: ["categories"],
@@ -73,6 +77,17 @@ const templatesQuery = (playerId: number) =>
     enabled: !!playerId,
   });
 
+const unvotedPartiesQuery = (playerId: number) =>
+  queryOptions({
+    queryKey: ["ratings", "unvoted", playerId],
+    queryFn: async () => {
+      const { data, error } = await api.ratings.unvoted[playerId].get();
+      if (error) throw error;
+      return data as UnvotedParty[];
+    },
+    enabled: !!playerId,
+  });
+
 function applicantsQuery(partyId: number, hostId: number) {
   return queryOptions({
     queryKey: ["lobby", "applicants", partyId],
@@ -113,12 +128,90 @@ export function LobbyPage() {
   // Fetch templates
   const { data: serverTemplates } = useQuery(templatesQuery(user?.id || 0));
 
+  // Fetch unvoted parties
+  const { data: unvotedParties } = useQuery(unvotedPartiesQuery(user?.id || 0));
+  const [unvotedDialogOpen, setUnvotedDialogOpen] = useState(false);
+  const [ratedParties, setRatedParties] = useState<Set<number>>(new Set());
+
+  // Show unvoted parties dialog on load if there are any
+  useEffect(() => {
+    if (unvotedParties && unvotedParties.length > 0) {
+      setUnvotedDialogOpen(true);
+    }
+  }, [unvotedParties]);
+
   // Fetch applicants when in host mode
   const partyId = lobbyState?.kind === "host" ? lobbyState.party.id : undefined;
   const { data: applicants } = useQuery({
     ...applicantsQuery(partyId || 0, user?.id || 0),
     enabled: partyId !== undefined && !!user?.id,
   });
+
+  // Listen for live applicant updates via SSE when in host mode
+  useEffect(() => {
+    if (!partyId) return;
+
+    const eventSource = new EventSource(
+      `${API_BASE_URL}/parties/${partyId}/applications/live`,
+    );
+
+    eventSource.addEventListener("application.created", (_event) => {
+      try {
+        queryClient.invalidateQueries({
+          queryKey: ["lobby", "applicants", partyId],
+        });
+      } catch (error) {
+        console.error("Failed to handle application.created event", error);
+      }
+    });
+
+    eventSource.addEventListener("application.updated", (_event) => {
+      try {
+        queryClient.invalidateQueries({
+          queryKey: ["lobby", "applicants", partyId],
+        });
+      } catch (error) {
+        console.error("Failed to handle application.updated event", error);
+      }
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [partyId, queryClient]);
+
+  // Listen for application status updates when in customer mode
+  const customerPartyId =
+    lobbyState?.kind === "customer"
+      ? lobbyState.application.partyId
+      : undefined;
+  useEffect(() => {
+    if (!customerPartyId) return;
+
+    const eventSource = new EventSource(
+      `${API_BASE_URL}/parties/${customerPartyId}/applications/live`,
+    );
+
+    eventSource.addEventListener("application.updated", (_event) => {
+      try {
+        queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      } catch (error) {
+        console.error("Failed to handle application.updated event", error);
+      }
+    });
+
+    eventSource.addEventListener("party.status.updated", (_event) => {
+      try {
+        queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      } catch (error) {
+        console.error("Failed to handle party.status.updated event", error);
+      }
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, [customerPartyId, queryClient]);
 
   // Normalize data for components
   const normalizedCategories = categories.map((category) => ({
@@ -158,7 +251,9 @@ export function LobbyPage() {
   const partyStatus: PartyStatus =
     lobbyState?.kind === "host"
       ? (lobbyState.party.status as PartyStatus)
-      : "Gathering";
+      : lobbyState?.kind === "customer"
+        ? (lobbyState.application.party.status as PartyStatus)
+        : "Gathering";
 
   const applicationStatus: ApplicationStatus =
     lobbyState?.kind === "customer"
@@ -286,6 +381,7 @@ export function LobbyPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["my-applications"] });
     },
   });
 
@@ -310,8 +406,11 @@ export function LobbyPage() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      setRatedParties((prev) => new Set(prev).add(variables.partyId));
       queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
+      queryClient.invalidateQueries({ queryKey: ["ratings", "unvoted"] });
     },
   });
 
@@ -397,7 +496,6 @@ export function LobbyPage() {
       )}
       {activeView === "customer" && (
         <CustomerLobbyView
-          form={form}
           partyId={partyId || 0}
           partyTitle={
             lobbyState?.kind === "customer"
@@ -418,6 +516,11 @@ export function LobbyPage() {
             lobbyState?.kind === "customer"
               ? lobbyState.application.party.league.name
               : ""
+          }
+          hostId={
+            lobbyState?.kind === "customer"
+              ? (lobbyState.application.party.host?.id ?? 0)
+              : 0
           }
           hostIgn={
             lobbyState?.kind === "customer"
@@ -446,14 +549,18 @@ export function LobbyPage() {
           }
           applicationStatus={applicationStatus}
           partyStatus={partyStatus}
+          hasRated={ratedParties.has(partyId || 0)}
           onCancelApplication={(partyId, playerId) =>
             cancelApplicationMutation.mutate({ partyId, playerId })
+          }
+          onSubmitRating={(giverId, receiverId, partyId, value) =>
+            submitRatingMutation.mutate({ giverId, receiverId, partyId, value })
           }
         />
       )}
       {activeView === "host" && (
         <HostLobbyView
-          form={form}
+          capacity={form.capacity}
           partyId={partyId || 0}
           partyTitle={lobbyState?.kind === "host" ? lobbyState.party.title : ""}
           partyDescription={
@@ -463,6 +570,11 @@ export function LobbyPage() {
           }
           partyStatus={partyStatus}
           applicants={normalizedApplicants}
+          submittedRatings={
+            ratedParties.has(partyId || 0)
+              ? new Set(normalizedApplicants.map((a) => a.id))
+              : new Set()
+          }
           onStartParty={(partyId) =>
             updatePartyStatusMutation.mutate({ partyId, status: "Started" })
           }
@@ -482,6 +594,17 @@ export function LobbyPage() {
           }
         />
       )}
+
+      {/* Unvoted Parties Dialog */}
+      <UnvotedRatingsDialog
+        open={unvotedDialogOpen}
+        onOpenChange={setUnvotedDialogOpen}
+        unvotedParties={unvotedParties || []}
+        userId={user?.id || 0}
+        onSubmitRating={(giverId, receiverId, partyId, value) =>
+          submitRatingMutation.mutate({ giverId, receiverId, partyId, value })
+        }
+      />
     </div>
   );
 }

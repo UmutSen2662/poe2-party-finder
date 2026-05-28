@@ -1,5 +1,9 @@
 import { Elysia, t } from "elysia";
-import { createRating, getPartyRatings } from "./ratings.service";
+import {
+  createRating,
+  getPartyRatings,
+  getUnvotedPartiesForPlayer,
+} from "./ratings.service";
 
 const RatingSchema = t.Object({
   id: t.Number(),
@@ -27,4 +31,24 @@ export const ratingsRoutes = new Elysia({ prefix: "/ratings" })
   .get("/party/:partyId", ({ params }) => getPartyRatings(params.partyId), {
     params: t.Object({ partyId: t.Number() }),
     response: t.Array(RatingSchema),
-  });
+  })
+  .get(
+    "/unvoted/:playerId",
+    ({ params }) => getUnvotedPartiesForPlayer(params.playerId),
+    {
+      params: t.Object({ playerId: t.Number() }),
+      response: t.Array(
+        t.Object({
+          partyId: t.Number(),
+          partyTitle: t.String(),
+          role: t.Union([t.Literal("host"), t.Literal("customer")]),
+          targets: t.Array(
+            t.Object({
+              id: t.Number(),
+              ign: t.String(),
+            }),
+          ),
+        }),
+      ),
+    },
+  );

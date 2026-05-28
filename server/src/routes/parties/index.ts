@@ -1,4 +1,5 @@
 import { Elysia, sse, t } from "elysia";
+import { subscribeToLiveApplications } from "../../lib/application-live-events";
 import { subscribeToLiveParties } from "../../lib/party-live-events";
 import {
   cancelParty,
@@ -115,6 +116,28 @@ export const partiesRoutes = new Elysia({ prefix: "/parties" })
         hostId: t.Number(),
         pendingOnly: t.Optional(t.Boolean()),
       }),
+    },
+  )
+  .get(
+    "/:id/applications/live",
+    async function* ({ params, request }) {
+      yield sse({
+        event: "connected",
+        data: { live: true, timestamp: new Date().toISOString() },
+      });
+
+      for await (const event of subscribeToLiveApplications(
+        params.id,
+        request.signal,
+      )) {
+        yield sse({
+          event: event.type,
+          data: event.data,
+        });
+      }
+    },
+    {
+      params: t.Object({ id: t.Number() }),
     },
   )
   .get(

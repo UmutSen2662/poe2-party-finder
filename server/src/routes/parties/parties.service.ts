@@ -8,6 +8,7 @@ import {
   parties,
   players,
 } from "../../db/schema";
+import { publishPartyStatusUpdated } from "../../lib/application-live-events";
 import {
   ConflictError,
   DatabaseError,
@@ -305,6 +306,7 @@ export const createParty = async (data: {
   categoryId: number;
   currencyId: number;
 }): Promise<PartyRow> => {
+  console.log("createParty called with data:", data);
   if (data.capacity <= 0) {
     throw new ValidationError("Capacity must be greater than zero");
   }
@@ -380,6 +382,8 @@ export const updatePartyStatus = async (
     if (!party) {
       throw new NotFoundError("Party not found");
     }
+
+    publishPartyStatusUpdated(id, status);
 
     return toPartyRow(party);
   } catch (error) {

@@ -61,27 +61,80 @@ export const badges = {
   rows: [
     {
       id: 1,
-      name: "King Slayer",
-      icon: "slayer_badge.png",
-      description: "Successfully host 50 King of the Mists carries.",
-      condition: { target: 50, metric: "successful_runs" },
+      name: "Test Badge One",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
     },
     {
       id: 2,
-      name: "Master Mentor",
-      icon: "guide_badge.png",
-      description: "Maintain a 9.50 positive rating over 100 Leveling runs.",
-      condition: { target: 9.5, metric: "rating_score" },
+      name: "Test Badge Two",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 3,
+      name: "Test Badge Three",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 4,
+      name: "Test Badge Four",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 5,
+      name: "Test Badge Five",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 6,
+      name: "Test Badge Six",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 7,
+      name: "Test Badge Seven",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 8,
+      name: "Test Badge Eight",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 9,
+      name: "Test Badge Nine",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
+    },
+    {
+      id: 10,
+      name: "Test Badge Ten",
+      icon: null,
+      description: "Test badge for development",
+      condition: {},
     },
   ],
 };
 
 export const badgeCategories = {
   target: "badge_categories",
-  rows: [
-    { badgeId: 1, categoryId: 5 },
-    { badgeId: 2, categoryId: 3 },
-  ],
+  rows: [],
 };
 
 export const players = {
@@ -93,9 +146,7 @@ export const players = {
       email: "emre@example.com",
       password: "$2b$10$DS6Nza/7LA5EOLfL51DNLeeV3iX.bxk82.3HiIB9aGAKk1/eVHhgu",
       oauth2: "oauth_token_111",
-      templates: [
-        { name: "Fast Olroth", text: "WTS Olroth Kill, fast and safe." },
-      ],
+      templates: [],
       hostRating: 9.85,
       customerRating: 10,
       hostThumbsUp: 150,
@@ -109,7 +160,7 @@ export const players = {
       email: "umut@example.com",
       password: "$2b$10$BwRZbm12YX3lMC91Bf7bc.numCt9LWv4eCrLn88DzGCnRI2SXBKN6",
       oauth2: "oauth_token_222",
-      templates: [{ name: "Gold Farm", text: "Hosting Gold runs, AFK spot." }],
+      templates: [],
       hostRating: 9.2,
       customerRating: 8.85,
       hostThumbsUp: 85,
@@ -152,72 +203,31 @@ export const earns = {
   target: "earns",
   rows: [
     { playerId: 1, badgeId: 1, pinned: true },
-    { playerId: 2, badgeId: 2, pinned: false },
+    { playerId: 1, badgeId: 3, pinned: false },
+    { playerId: 1, badgeId: 5, pinned: false },
+    { playerId: 1, badgeId: 7, pinned: false },
+    { playerId: 1, badgeId: 9, pinned: false },
+    { playerId: 2, badgeId: 2, pinned: true },
+    { playerId: 2, badgeId: 4, pinned: false },
+    { playerId: 2, badgeId: 6, pinned: false },
+    { playerId: 2, badgeId: 8, pinned: false },
+    { playerId: 2, badgeId: 10, pinned: false },
   ],
 };
 
 export const parties = {
   target: "parties",
-  rows: [
-    {
-      id: 1,
-      title: "Olroth Kill - EU Server",
-      description: "Bring your own entry, stay dead if you die.",
-      capacity: 5,
-      status: "ended",
-      cost: 2,
-      hostId: 1,
-      leagueId: 3,
-      categoryId: 6,
-      currencyId: 2,
-    },
-    {
-      id: 2,
-      title: "Gold Farm - 5 runs",
-      description: "Resetting fast, stay AFK.",
-      capacity: 5,
-      status: "ended",
-      cost: 50,
-      hostId: 2,
-      leagueId: 1,
-      categoryId: 7,
-      currencyId: 1,
-    },
-    {
-      id: 3,
-      title: "King of the Mists Carry",
-      description: "Quick kill.",
-      capacity: 5,
-      status: "ended",
-      cost: 1,
-      hostId: 1,
-      leagueId: 1,
-      categoryId: 5,
-      currencyId: 2,
-    },
-  ],
+  rows: [],
 };
 
 export const applies = {
   target: "applies",
-  rows: [
-    { playerId: 2, partyId: 1, status: "pending" },
-    { playerId: 3, partyId: 1, status: "accepted" },
-    { playerId: 3, partyId: 2, status: "accepted" },
-    { playerId: 4, partyId: 2, status: "rejected" },
-    { playerId: 3, partyId: 3, status: "accepted" },
-    { playerId: 4, partyId: 3, status: "accepted" },
-  ],
+  rows: [],
 };
 
 export const ratings = {
   target: "ratings",
-  rows: [
-    { id: 1, value: 1, giverId: 3, receiverId: 1, partyId: 3 },
-    { id: 2, value: 1, giverId: 1, receiverId: 3, partyId: 3 },
-    { id: 3, value: -1, giverId: 4, receiverId: 1, partyId: 3 },
-    { id: 4, value: -1, giverId: 1, receiverId: 4, partyId: 3 },
-  ],
+  rows: [],
 };
 
 export const posts = {

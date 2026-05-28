@@ -1,6 +1,10 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../../db";
-import { applies, parties } from "../../db/schema";
+import { applies, parties, players } from "../../db/schema";
+import {
+  publishApplicationCreated,
+  publishApplicationUpdated,
+} from "../../lib/application-live-events";
 import {
   ConflictError,
   DatabaseError,
@@ -88,6 +92,25 @@ export const createApplication = async (data: {
       })
       .returning();
 
+    const [player] = await db
+      .select()
+      .from(players)
+      .where(eq(players.id, data.playerId))
+      .limit(1);
+
+    if (player) {
+      publishApplicationCreated({
+        playerId: player.id,
+        partyId: application.partyId,
+        ign: player.ign,
+        customerRating: player.customerRating,
+        customerThumbsUp: player.customerThumbsUp,
+        customerThumbsDown: player.customerThumbsDown,
+        status: toPublicApplicationStatus(application.status),
+        appliedAt: application.appliedAt,
+      });
+    }
+
     return toApplicationRow(application);
   } catch (error) {
     if (
@@ -153,6 +176,25 @@ export const updateApplicationStatus = async (
 
     if (!application) {
       throw new NotFoundError("Application not found");
+    }
+
+    const [player] = await db
+      .select()
+      .from(players)
+      .where(eq(players.id, playerId))
+      .limit(1);
+
+    if (player) {
+      publishApplicationUpdated({
+        playerId: player.id,
+        partyId: application.partyId,
+        ign: player.ign,
+        customerRating: player.customerRating,
+        customerThumbsUp: player.customerThumbsUp,
+        customerThumbsDown: player.customerThumbsDown,
+        status: toPublicApplicationStatus(application.status),
+        appliedAt: application.appliedAt,
+      });
     }
 
     return toApplicationRow(application);

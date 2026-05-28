@@ -27,7 +27,7 @@ const ServiceTemplateSchema = t.Object({
 const PlayerSchema = t.Object({
   id: t.Number(),
   ign: t.String(),
-  oauth2: t.String(),
+  oauth2: t.Union([t.String(), t.Null()]),
   templates: t.Array(ServiceTemplateSchema),
   hostRating: t.Number(),
   customerRating: t.Number(),
