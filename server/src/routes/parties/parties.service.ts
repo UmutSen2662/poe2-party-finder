@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, lte, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import {
   applies,
@@ -103,7 +103,7 @@ const getEquippedBadges = async (playerId: number) => {
   const badgeRecords = await db
     .select()
     .from(badges)
-    .where(sql`${badges.id} = ANY(${badgeIds})`);
+    .where(inArray(badges.id, badgeIds));
 
   return badgeRecords.map((badge) => ({
     id: badge.id,

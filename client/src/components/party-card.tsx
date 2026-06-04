@@ -114,7 +114,7 @@ export function PartyCard({
             "absolute top-3 right-3 z-20 bg-black/80",
             !isStale && "opacity-0 group-hover:opacity-100 transition-all",
             isStale &&
-              "opacity-100 bg-amber-600/20 text-amber-400 hover:bg-amber-600/30",
+              "w-auto px-2 opacity-100 bg-amber-600/80 text-amber-400 hover:bg-amber-600/100",
           )}
         >
           <RefreshCw className="size-4" />
