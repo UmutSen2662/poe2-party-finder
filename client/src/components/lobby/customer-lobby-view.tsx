@@ -24,6 +24,8 @@ interface CustomerLobbyViewProps {
   applicationStatus: ApplicationStatus;
   partyStatus: PartyStatus;
   hasRated: boolean;
+  showRatingDialog?: boolean;
+  onRatingDialogClose?: () => void;
   onCancelApplication: (partyId: number, playerId: number) => void;
   onSubmitRating: (
     giverId: number,
@@ -48,11 +50,17 @@ export function CustomerLobbyView({
   applicationStatus,
   partyStatus,
   hasRated,
+  showRatingDialog,
+  onRatingDialogClose,
   onCancelApplication,
   onSubmitRating,
 }: CustomerLobbyViewProps) {
   const { user } = useAuth();
-  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [internalRatingDialogOpen, setInternalRatingDialogOpen] =
+    useState(false);
+  const ratingDialogOpen = showRatingDialog || internalRatingDialogOpen;
+  const setRatingDialogOpen =
+    onRatingDialogClose || setInternalRatingDialogOpen;
   const canCopyWhisper = applicationStatus === "Accepted";
   const canCancel =
     partyStatus === "Gathering" && applicationStatus === "Pending";
@@ -67,7 +75,7 @@ export function CustomerLobbyView({
     ) {
       setRatingDialogOpen(true);
     }
-  }, [partyStatus, applicationStatus, hasRated]);
+  }, [partyStatus, applicationStatus, hasRated, setRatingDialogOpen]);
 
   const copyWhisper = () => {
     if (!canCopyWhisper) return;

@@ -35,12 +35,12 @@ export function ServerErrorPage() {
           <div className="text-sm text-muted-foreground">
             <p className="mb-2">
               The application could not reach the server at{" "}
-              <code className="bg-muted px-1 py-0.5 rounded">localhost:3000</code>
+              <code className="bg-muted px-1 py-0.5 rounded">
+                localhost:3000
+              </code>
               .
             </p>
-            <p>
-              This could mean:
-            </p>
+            <p>This could mean:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>The server is not running</li>
               <li>There's a network connection issue</li>

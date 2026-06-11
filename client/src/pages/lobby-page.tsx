@@ -124,6 +124,7 @@ export function LobbyPage() {
     categoryId: null,
     currencyId: 1,
   });
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
 
   // Fetch lookup data
   const { data: categories } = useSuspenseQuery(categoriesQuery);
@@ -330,9 +331,13 @@ export function LobbyPage() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["lobby", "state"] });
       queryClient.invalidateQueries({ queryKey: ["parties"] });
+      if (variables.status === "Ended") {
+        await queryClient.refetchQueries({ queryKey: ["lobby", "state"] });
+        setShowRatingDialog(true);
+      }
     },
   });
 
@@ -566,6 +571,8 @@ export function LobbyPage() {
           applicationStatus={applicationStatus}
           partyStatus={partyStatus}
           hasRated={ratedParties.has(partyId || 0)}
+          showRatingDialog={showRatingDialog}
+          onRatingDialogClose={() => setShowRatingDialog(false)}
           onCancelApplication={(partyId, playerId) =>
             cancelApplicationMutation.mutate({ partyId, playerId })
           }
@@ -591,6 +598,8 @@ export function LobbyPage() {
               ? new Set(normalizedApplicants.map((a) => a.id))
               : new Set()
           }
+          showRatingDialog={showRatingDialog}
+          onRatingDialogClose={() => setShowRatingDialog(false)}
           onStartParty={(partyId) =>
             updatePartyStatusMutation.mutate({ partyId, status: "Started" })
           }

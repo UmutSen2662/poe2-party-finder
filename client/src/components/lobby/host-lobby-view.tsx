@@ -42,6 +42,8 @@ interface HostLobbyViewProps {
   partyStatus: PartyStatus;
   applicants: Applicant[];
   submittedRatings: Set<string>;
+  showRatingDialog?: boolean;
+  onRatingDialogClose?: () => void;
   onStartParty: (partyId: number) => void;
   onEndParty: (partyId: number) => void;
   onCancelParty: (partyId: number) => void;
@@ -119,6 +121,8 @@ export function HostLobbyView({
   partyStatus,
   applicants,
   submittedRatings,
+  showRatingDialog,
+  onRatingDialogClose,
   onStartParty,
   onEndParty,
   onCancelParty,
@@ -126,7 +130,11 @@ export function HostLobbyView({
   onSubmitRating,
 }: HostLobbyViewProps) {
   const { user } = useAuth();
-  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [internalRatingDialogOpen, setInternalRatingDialogOpen] =
+    useState(false);
+  const ratingDialogOpen = showRatingDialog || internalRatingDialogOpen;
+  const setRatingDialogOpen =
+    onRatingDialogClose || setInternalRatingDialogOpen;
   const acceptedCount = applicants.filter(
     (applicant) => applicant.status === "Accepted",
   ).length;
@@ -141,7 +149,6 @@ export function HostLobbyView({
 
   const handleEndParty = () => {
     onEndParty(partyId);
-    setRatingDialogOpen(true);
   };
 
   const handleCancelParty = () => {
