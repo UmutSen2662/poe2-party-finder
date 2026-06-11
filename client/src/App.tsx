@@ -7,6 +7,7 @@ import { BadgePage } from "./pages/badge-page";
 import { LobbyPage } from "./pages/lobby-page";
 import { LoginPage } from "./pages/login-page";
 import { SearchPage } from "./pages/search-page";
+import { ServerErrorPage } from "./pages/server-error-page";
 import { SettingsPage } from "./pages/settings-page";
 import { TestPage } from "./pages/test-page";
 import "./App.css";
@@ -52,7 +53,7 @@ function TabPage({
 }
 
 function AppContent() {
-  const { loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated, serverError } = useAuth();
   const [activeTab, setActiveTab] = useState("home");
 
   if (loading) {
@@ -61,6 +62,10 @@ function AppContent() {
         Loading...
       </div>
     );
+  }
+
+  if (serverError) {
+    return <ServerErrorPage />;
   }
 
   if (!isAuthenticated) {

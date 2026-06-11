@@ -58,7 +58,7 @@ export function SettingsPage() {
               <p className="text-sm text-muted-foreground">Host Rating</p>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
-                  {user?.hostRating.toFixed(1) || "0.0"}
+                  {(user?.hostRating ?? 0).toFixed(1)}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   ({user?.hostThumbsUp || 0} 👍 / {user?.hostThumbsDown || 0}{" "}
@@ -70,7 +70,7 @@ export function SettingsPage() {
               <p className="text-sm text-muted-foreground">Customer Rating</p>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
-                  {user?.customerRating.toFixed(1) || "0.0"}
+                  {(user?.customerRating ?? 0).toFixed(1)}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   ({user?.customerThumbsUp || 0} 👍 /{" "}

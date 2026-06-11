@@ -18,6 +18,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   isAuthenticated: boolean;
+  serverError: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [serverError, setServerError] = useState(false);
 
   useEffect(() => {
     const fetchCurrentUser = async (authToken: string) => {
@@ -42,9 +44,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
         setUser(response.data);
-      } catch {
+        setServerError(false);
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
+        setServerError(true);
       } finally {
         setLoading(false);
       }
@@ -66,12 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setToken(response.data.token);
     setUser(response.data.user);
+    setServerError(false);
     localStorage.setItem(TOKEN_KEY, response.data.token);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setServerError(false);
     localStorage.removeItem(TOKEN_KEY);
   };
 
@@ -80,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     token,
     loading,
     isAuthenticated: !!user,
+    serverError,
     login,
     logout,
   };
